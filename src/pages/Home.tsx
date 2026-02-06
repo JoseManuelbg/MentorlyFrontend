@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../context/AuthContext"; 
 import { Link } from "react-router-dom";
+import { notify } from "../reusable/Notification";
 
 interface UserPayload {
   sub: string;
@@ -9,10 +10,20 @@ interface UserPayload {
   roles: string[];
 }
 
+interface Quote {
+  _id: string;
+  content: string;
+  author: string;
+  authorSlug: string;
+  length: number;
+  tags: string[];
+}
+
 export default function Home() {
   const [user, setUser] = useState<UserPayload | null>(null);
   const [activeUsers, setActiveUsers] = useState<number>(0);
   const { token } = useAuth();
+  const [quote, setQuote] = useState<Quote>();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -21,11 +32,31 @@ export default function Home() {
       const decoded: UserPayload = jwtDecode(pureToken);
       setUser(decoded);
 
-      // Check if roles array includes "admin"
+      // Si el usuario es admin, cargamos las estadísticas
       if (decoded.roles.some(role => role.toLowerCase() === "admin")) {
         fetchStats(pureToken);
       }
     }
+  }, []);
+
+  // Efecto para cargar la frase del día
+  useEffect(() => {
+    const fetchQuote = async () => {
+      try {
+        const response = await fetch('https://api.quotable.io/random');
+        if (!response.ok) {
+          // No bloqueamos la app si falla la API de frases, solo notificamos
+          console.warn("No se pudo cargar la frase diaria");
+          return;
+        }
+        const data = await response.json();
+        setQuote(data);
+      } catch (error) {
+        console.error("Error en la API de frases:", error);
+      }
+    };
+
+    fetchQuote();
   }, []);
 
   const fetchStats = async (t: string) => {
@@ -60,7 +91,7 @@ export default function Home() {
       {/* --- BENTO STYLE GRID --- */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
         
-        {/* Profile Card (Large) */}
+        {/* Profile Card */}
         <div className="md:col-span-2 md:row-span-2 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <span className="px-4 py-1.5 bg-salviaGreen/10 text-salviaGreen text-[10px] font-bold rounded-full uppercase tracking-widest">Account Details</span>
@@ -87,15 +118,18 @@ export default function Home() {
               <h3 className="text-7xl font-black tracking-tighter">{activeUsers}</h3>
               <p className="text-blue-100 mt-2 font-bold text-lg">Active Users</p>
             </div>
-            {/* Animated background shape */}
             <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors"></div>
           </div>
         ) : (
           <div className="md:col-span-2 bg-salviaGreen p-10 rounded-[3rem] text-white shadow-xl shadow-salviaGreen/20 flex flex-col justify-between relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-white/80 text-[10px] font-black uppercase tracking-widest mb-2">Daily Quote</p>
-              <h3 className="text-2xl font-bold leading-snug italic">"The beautiful thing about learning is that nobody can take it away from you."</h3>
-              <p className="mt-4 text-white/90 font-medium">— B.B. King</p>
+              <h3 className="text-2xl font-bold leading-snug italic">
+                {quote ? `"${quote.content}"` : '"The beautiful thing about learning is that nobody can take it away from you."'}
+              </h3>
+              <p className="mt-4 text-white/90 font-medium">
+                {quote ? `— ${quote.author}` : "— B.B. King"}
+              </p>
             </div>
             <div className="mt-8 relative z-10">
                <button className="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full text-sm font-bold backdrop-blur-md transition-all">

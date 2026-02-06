@@ -79,7 +79,8 @@ if (!res.ok) {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `${token}`,
+
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             email: formData.email,
@@ -93,7 +94,6 @@ if (!res.ok) {
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
         notify(errData?.message || "Error updating user", "error");
-        console.log(res)
         setLoading(false);
         return;
       }
