@@ -16,7 +16,6 @@ export default function EditUserForm() {
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true); // para esperar me()
   const { logout } = useAuth();
-  // Cargamos datos del usuario
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) return;

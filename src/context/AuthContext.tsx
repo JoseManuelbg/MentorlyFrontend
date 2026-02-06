@@ -1,69 +1,79 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from "react";
-import type { User } from "../models/User";
-import type { AuthResponse } from "../models/AuthResponse";
 import { jwtDecode } from 'jwt-decode';
+
+interface User {
+    sub: string;
+    email: string;
+    roles: string[]; // Changed from roles: string[] to a single string
+}
+
+interface AuthResponse {
+    token: string;
+}
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
-    login: (data:AuthResponse) => void;
+    loading: boolean;
+    login: (data: AuthResponse) => void;
     logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-//Provider
-
-export const AuthProvider = ({children} : {children: ReactNode}) =>{
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
-
-    //Verify local storage
-    useEffect(()=>{
+    useEffect(() => {
         const t = localStorage.getItem("token");
-        if(t){
-            const pureToken = t.startsWith("Bearer ") ? t.slice(7) : t;
-               try {
-            const decoded: User = jwtDecode(pureToken);
-            setToken(pureToken);
-            setUser(decoded);
-        } catch (err) {
-            console.error("Token inválido en localStorage:", err);
-            localStorage.removeItem("token");
-            setToken(null);
-            setUser(null);
+        if (t) {
+            try {
+                const pureToken = t.startsWith("Bearer ") ? t.slice(7) : t;
+                const decoded: User = jwtDecode(pureToken);
+                
+                // Expiration check
+                const currentTime = Date.now() / 1000;
+                if ((decoded as any).exp < currentTime) {
+                    throw new Error("Token expired");
+                }
+
+                setToken(pureToken);
+                setUser(decoded);
+            } catch (err) {
+                console.error("Session invalid or expired:", err);
+                logout();
+            }
         }
-        }
-    }, [])
+        setLoading(false);
+    }, []);
 
+    const login = (data: AuthResponse) => {
+        const pureToken = data.token.startsWith("Bearer ") ? data.token.slice(7) : data.token;
+        const decoded: User = jwtDecode(pureToken);
+        
+        setToken(pureToken);
+        setUser(decoded);
+        localStorage.setItem("token", pureToken);
+    };
 
-    const login  = (data: AuthResponse) => {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token.startsWith("Bearer ") ? data.token.slice(7) : data.token);
-
-    }
-
-    const logout = ()=> {
+    const logout = () => {
         setUser(null);
         setToken(null);
-        localStorage.removeItem("user");
         localStorage.removeItem("token");
-    }
+    };
 
-    return(
-        <AuthContext.Provider value={{user,token,login,logout}}>
-            {children}
+    return (
+        <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+            {!loading && children} 
         </AuthContext.Provider>
-    )
+    );
+};
 
-}
-
-export const useAuth = ()=>{
+export const useAuth = () => {
     const context = useContext(AuthContext);
-    if(!context) throw new Error("the provider failed");
+    if (!context) throw new Error("useAuth must be used within an AuthProvider");
     return context;
-}
+};

@@ -39,7 +39,7 @@ const AdminSubjects: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8080/api/admin/subjects", {
+      const res = await fetch("http://localhost:8080/subjects/admin", {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(newSubject),
@@ -65,7 +65,7 @@ const AdminSubjects: React.FC = () => {
     if (!editingSubject) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/subjects/${editingSubject.id}`, {
+      const res = await fetch(`http://localhost:8080/subjects/admin/${editingSubject.id}`, {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(editingSubject),
@@ -88,7 +88,7 @@ const AdminSubjects: React.FC = () => {
   const confirmDelete = async () => {
     if (!subjectToDelete) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/subjects/${subjectToDelete.id}`, { 
+      const res = await fetch(`http://localhost:8080/subjects/admin/${subjectToDelete.id}`, { 
         method: "DELETE",
         headers: getHeaders()
       });

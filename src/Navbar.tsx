@@ -6,6 +6,7 @@ import "font-awesome/css/font-awesome.min.css";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
+  console.log("Current User Data:", user); // <--- Add this
   const [openU, setOpenU] = useState(false);
   const navigate = useNavigate();
 
@@ -15,8 +16,9 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const isAdmin = user?.role === "admin";
-
+const isAdmin = user?.roles?.some(role => 
+  role.toLowerCase() === "admin" || role.toLowerCase() === "role_admin"
+);
   return (
     <nav className="bg-brokenWhite shadow-md border-b border-salviaGreen/30 sticky top-0 z-50">
       <div className="flex items-center justify-between px-6 py-4 lg:px-12">
@@ -55,7 +57,7 @@ export default function Navbar() {
                 {/* Info Usuario */}
                 <li className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100 mb-1">
                   {user.email} <br/>
-                  <span className="font-bold text-salviaGreen">{user.role}</span>
+                  <span className="font-bold text-salviaGreen">{user.roles}</span>
                 </li>
 
                 {/* Opciones Generales */}
