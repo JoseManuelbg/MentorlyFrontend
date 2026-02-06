@@ -8,7 +8,7 @@ import EditUser from './pages/EditUser'
 import AdminSubjects from './pages/ManageSubjects' 
 import ProtectedRoute from './reusable/ProtectedRoute' 
 import { AuthProvider } from './context/AuthContext' 
-
+import UserFinder from './pages/UserFinder'
 function App() {
   return (
     <AuthProvider>
@@ -25,6 +25,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path='/' element={<Home />} />
             <Route path='/edit' element={<EditUser />} />
+            <Route path='/findMentor' element={<UserFinder />} />
           </Route>
           
           {/* --- ADMIN ONLY ROUTES --- */}

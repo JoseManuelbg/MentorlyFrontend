@@ -81,7 +81,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#f8f9fa] p-6 lg:p-12 font-sans">
       <header className="mb-10">
         <h1 className="text-4xl font-black text-slate-800 tracking-tight">
-          Welcome back, <span className="text-salviaGreen">{user.email.split('@')[0]}</span> 👋
+          Welcome back, <span className="text-salviaGreen">{user.email.split('@')[0]}</span>
         </h1>
         <p className="text-slate-500 font-medium mt-2">
           {isAdmin ? "Administration Control Center" : "Explore your learning journey today."}
