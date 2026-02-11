@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const pureToken = t.startsWith("Bearer ") ? t.slice(7) : t;
                 const decoded: User = jwtDecode(pureToken);
-                
+                console.log("Contenido del token:", decoded); // <--- MIRA ESTO EN LA CONSOLA
                 // Expiration check
                 const currentTime = Date.now() / 1000;
                 if ((decoded as any).exp < currentTime) {

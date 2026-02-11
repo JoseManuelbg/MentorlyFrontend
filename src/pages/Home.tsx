@@ -125,7 +125,7 @@ export default function Home() {
             <div className="relative z-10">
               <p className="text-white/80 text-[10px] font-black uppercase tracking-widest mb-2">Daily Quote</p>
               <h3 className="text-2xl font-bold leading-snug italic">
-                {quote ? `"${quote.content}"` : '"The beautiful thing about learning is that nobody can take it away from you."'}
+                {quote?.content}
               </h3>
               <p className="mt-4 text-white/90 font-medium">
                 {quote ? `— ${quote.author}` : "— B.B. King"}

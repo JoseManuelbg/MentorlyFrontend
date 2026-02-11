@@ -9,6 +9,7 @@ import AdminSubjects from './pages/ManageSubjects'
 import ProtectedRoute from './reusable/ProtectedRoute' 
 import { AuthProvider } from './context/AuthContext' 
 import UserFinder from './pages/UserFinder'
+import SeeProfile from './pages/SeeProfile'
 function App() {
   return (
     <AuthProvider>
@@ -19,6 +20,8 @@ function App() {
           {/* --- PUBLIC ROUTES --- */}
           <Route path='/login' element={<Login />} />
           <Route path='/signup' element={<MultiStepForm/>} />
+          <Route path='/seeProfile/:id' element={<SeeProfile />} />
+
     
           {/* --- PROTECTED ROUTES (Any logged-in user) --- */}
           {/* Note: No allowedRoles passed means any valid token can enter */}

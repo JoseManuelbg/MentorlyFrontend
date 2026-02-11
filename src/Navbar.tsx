@@ -6,7 +6,6 @@ import "font-awesome/css/font-awesome.min.css";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
-  console.log("Current User Data:", user); // <--- Add this
   const [openU, setOpenU] = useState(false);
   const navigate = useNavigate();
 
@@ -61,6 +60,12 @@ const isAdmin = user?.roles?.some(role =>
                 </li>
 
                 {/* Opciones Generales */}
+                <li>
+                  <Link to="/findMentor" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
+                    <i className="fa fa-cog mr-2"></i> Find mentors
+
+                  </Link>
+                </li>
                 <li>
                   <Link to="/edit" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
                     <i className="fa fa-cog mr-2"></i> Edit Profile
@@ -127,6 +132,7 @@ const isAdmin = user?.roles?.some(role =>
                 </>
               )}
               <Link to="/edit" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Edit Profile</Link>
+              <Link to="/findMentor" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Find mentor</Link>
               <button onClick={handleLogout} className="py-2 px-4 rounded-lg bg-red-100 text-red-600 text-left">Logout</button>
             </>
           )}

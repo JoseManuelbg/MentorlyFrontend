@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { notify } from "../reusable/Notification";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 interface UserMatchDTO {
+  id: string,
   name: string;
   score: number;
   commonSubjects: string[]; 
@@ -40,6 +42,8 @@ const UserFinder: React.FC = () => {
   useEffect(() => {
     fetchMatches();
   }, [token, user?.sub]);
+
+  
 
   return (
     <div className="bg-salviaGreen min-h-screen py-12 px-6 flex flex-col items-center">
@@ -115,10 +119,10 @@ const UserFinder: React.FC = () => {
     )}
   </div>
 </div>
-
-                <button className="w-full py-2.5 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-lg shadow-slate-200">
-                  Ver perfil completo
-                </button>
+            {/*{match?.id}*/}
+                <Link to={`/seeProfile/${match.id}`}  className="w-full py-2.5 p-2 bg-slate-800  text-white rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-lg shadow-slate-200">
+                  Ver perfil completo 
+                </Link>
               </div>
             ))}
           </div>
