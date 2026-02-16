@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { AuthResponse } from "../models/AuthResponse";
 import { notify } from "../reusable/Notification";
 
@@ -90,7 +90,7 @@ className="backdrop-blur-lg bg-brokenWhite/70 p-6 rounded-xl shadow-lg w-full fl
 
 </div>
 
-<a href="#" className="text-gray-400 border-b border-dashed"><small>Forgot your password?</small></a>
+<Link to='/forgotPassword' className="text-gray-400 border-b border-dashed"><small>Forgot your password?</small></Link>
 
 </div>
 

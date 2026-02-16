@@ -11,6 +11,8 @@ import { AuthProvider } from './context/AuthContext'
 import UserFinder from './pages/UserFinder'
 import SeeProfile from './pages/SeeProfile'
 import SeeRequests from './pages/SeeRequest'
+import ForgotPassword from './pages/ForgotPasswordEmail'
+import ResetPassword from './pages/ResetPassword'
 function App() {
   return (
     <AuthProvider>
@@ -22,8 +24,9 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/signup' element={<MultiStepForm/>} />
           <Route path='/seeProfile/:id' element={<SeeProfile />} />
+          <Route path='/forgotPassword' element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-    
           {/* --- PROTECTED ROUTES (Any logged-in user) --- */}
           {/* Note: No allowedRoles passed means any valid token can enter */}
           <Route element={<ProtectedRoute />}>
