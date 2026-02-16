@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { notify } from "../reusable/Notification";
 import { useNavigate } from "react-router-dom";
 
 export default function EditUserForm() {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -13,182 +16,152 @@ export default function EditUserForm() {
     email: "",
     role: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [loadingUser, setLoadingUser] = useState(true); // para esperar me()
-  const { logout } = useAuth();
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!token) return;
 
-      try {
-        const res = await fetch("http://localhost:8080/me", {
-        headers: { Authorization: `Bearer ${token.startsWith("Bearer ") ? token.slice(7) : token}` }
-        });
+  // Usamos useCallback para evitar re-renders infinitos
+  const fetchUser = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:8080/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-if (res.status === 401 || res.status === 403) {
-  logout();
-  navigate("/login");
-  return;
-}
-
-if (!res.ok) {
-  throw new Error("Failed to fetch user");
-}
-        const data = await res.json();
-        setFormData({
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          password: "",
-          role: data.role,
-        });
-
-        setLoadingUser(false);
-      } catch (err) {
-        console.error(err);
-        notify("Error fetching user data", "error");
-        setLoadingUser(false);
+      if (res.status === 401 || res.status === 403) {
+        logout();
+        navigate("/login");
+        return;
       }
-    };
 
+      if (!res.ok) throw new Error();
+      
+      const data = await res.json();
+      setFormData({
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        password: "", // La password se deja vacía por seguridad
+        role: data.role,
+      });
+    } catch (err) {
+      notify("Error al cargar datos de usuario", "error");
+    } finally {
+      setLoadingUser(false);
+    }
+  }, [token, logout, navigate]);
+
+  useEffect(() => {
     fetchUser();
-  }, [token]);
-
-  if (!user || loadingUser)
-    return <p className="text-center mt-10">Cargando usuario...</p>;
+  }, [fetchUser]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!formData.email) {
-      notify("Email not loaded yet", "error");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(
-        `http://localhost:8080/edit?email=${formData.email}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
+      const res = await fetch(`http://localhost:8080/edit?email=${formData.email}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          username: formData.username,
+          password: formData.password || null // Si está vacía, no se actualiza
+        }),
+      });
 
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            name: formData.name,
-            username: formData.username,
-            password: formData.password
-          }),
-        }
-      );
+      const data = await res.json();
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        notify(errData?.message || "Error updating user", "error");
-        setLoading(false);
+        // Aquí conectamos con tu GlobalControllerError (ApiError)
+        const errorData = (data as unknown) as { message: string };
+        notify(errorData.message || "Error al actualizar", "error");
         return;
       }
 
-      notify("User updated successfully", "success");
-      setLoading(false);
+      notify("Perfil actualizado correctamente", "success");
       navigate("/");
     } catch (err) {
-      console.error(err);
-      notify("Server error", "error");
+      notify("Error de servidor", "error");
+    } finally {
       setLoading(false);
     }
   };
 
+  if (loadingUser) return (
+    <div className="min-h-screen bg-salviaGreen flex items-center justify-center">
+      <p className="text-forestDark font-bold animate-pulse">Cargando perfil...</p>
+    </div>
+  );
 
   return (
     <div className="bg-salviaGreen min-h-screen flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="backdrop-blur-lg bg-brokenWhite/70 p-6 rounded-xl shadow-lg w-full flex flex-col gap-4 max-w-md mx-auto"
+        className="backdrop-blur-lg bg-brokenWhite/80 p-8 rounded-2xl shadow-xl w-full max-w-md flex flex-col gap-5 border border-white/20"
       >
-        <h1 className="text-3xl font-bold text-center mb-4">Editar Usuario</h1>
+        <h1 className="text-2xl font-bold text-forestDark text-center">Mi Perfil</h1>
 
-        {/* Name */}
-        <div>
-          <label className="block text-base/normal font-semibold text-gray-800 mb-2">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="block w-full rounded placeholder-gray-400 py-1.5 px-3 bg-transparent border-white/10 text-grey-800 focus:border-white/25 focus:outline-0 focus:ring-0"
-          />
+        <div className="space-y-4">
+          {/* Campos Editables */}
+          {[
+            { label: "Nombre Completo", name: "name", type: "text", val: formData.name, disabled: false },
+            { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, disabled: false },
+            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, disabled: false, placeholder: "Dejar en blanco para no cambiar" },
+          ].map((field) => (
+            <div key={field.name}>
+              <label className="block text-xs font-bold text-forestDark/60 uppercase mb-1 ml-1">{field.label}</label>
+              <input
+                type={field.type}
+                name={field.name}
+                value={field.val}
+                onChange={handleChange}
+                placeholder={field.placeholder}
+                className="block w-full rounded-xl py-2.5 px-4 bg-white/50 border border-sageGrey text-forestDark focus:ring-2 focus:ring-salviaGreen focus:outline-none transition-all"
+              />
+            </div>
+          ))}
+
+          {/* Campos Bloqueados (Regla de negocio HU 3) */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div>
+              <label className="block text-xs font-bold text-forestDark/40 uppercase mb-1 ml-1">Email</label>
+              <input
+                disabled
+                value={formData.email}
+                className="block w-full rounded-xl py-2 px-3 bg-sageGrey/30 border border-transparent text-forestDark/50 cursor-not-allowed text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-forestDark/40 uppercase mb-1 ml-1">Rol</label>
+              <input
+                disabled
+                value={formData.role}
+                className="block w-full rounded-xl py-2 px-3 bg-sageGrey/30 border border-transparent text-forestDark/50 cursor-not-allowed text-sm"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Username */}
-        <div>
-          <label className="block text-base/normal font-semibold text-gray-800 mb-2">Username</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className="block w-full rounded placeholder-gray-400 py-1.5 px-3 bg-transparent border-white/10 text-grey-800 focus:border-white/25 focus:outline-0 focus:ring-0"
-          />
-        </div>
-
-        {/* Password */}
-        <div>
-          <label className="block text-base/normal font-semibold text-gray-800 mb-2">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="New password..."
-            className="block w-full rounded placeholder-gray-400 py-1.5 px-3 bg-transparent border-white/10 text-grey-800 focus:border-white/25 focus:outline-0 focus:ring-0"
-          />
-        </div>
-
-        {/* Email (bloqueado) */}
-        <div>
-          <label className="block text-base/normal font-semibold text-gray-800 mb-2">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            disabled
-            className="block w-full rounded placeholder-gray-400 py-1.5 px-3 bg-gray-700 border-white/20 text-grey-800 cursor-not-allowed"
-          />
-        </div>
-
-        {/* Role (bloqueado) */}
-        <div>
-          <label className="block text-base/normal font-semibold text-gray-800 mb-2">Role</label>
-          <input
-            type="text"
-            name="role"
-            value={formData.role}
-            disabled
-            className="block w-full rounded placeholder-gray-400 py-1.5 px-3 bg-gray-700 border-white/20 text-grey-800 cursor-not-allowed"
-          />
-        </div>
-
-        {/* Botón enviar */}
-        <div className="w-full flex justify-between">
-        <button type="button" onClick={() => navigate("/")} className="w-1/2 bg-red-500 inline-flex items-center justify-center px-6 py-2 backdrop-blur-2x1 rounded-lg text-grey-800 transition-all duration-500 group hover:bg-red-700 hover:text-white mt-5">Go back</button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-1/2 inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-green-500 text-grey-800 rounded-lg transition-all duration-500 group hover:bg-green-700 hover:text-white mt-5"
-        >
-          {loading ? "Updating..." : "Save Changes"}
-        </button>
-        
+        <div className="flex gap-3 mt-4">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex-1 py-3 px-4 rounded-xl font-bold text-forestDark border-2 border-sageGrey hover:bg-sageGrey/20 transition-all"
+          >
+            Volver
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 py-3 px-4 rounded-xl font-bold bg-forestDark text-white shadow-lg hover:bg-forestDark/90 disabled:opacity-50 transition-all"
+          >
+            {loading ? "Guardando..." : "Guardar"}
+          </button>
         </div>
       </form>
     </div>

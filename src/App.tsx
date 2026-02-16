@@ -10,6 +10,7 @@ import ProtectedRoute from './reusable/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext' 
 import UserFinder from './pages/UserFinder'
 import SeeProfile from './pages/SeeProfile'
+import SeeRequests from './pages/SeeRequest'
 function App() {
   return (
     <AuthProvider>
@@ -29,6 +30,7 @@ function App() {
             <Route path='/' element={<Home />} />
             <Route path='/edit' element={<EditUser />} />
             <Route path='/findMentor' element={<UserFinder />} />
+            <Route path='/seeRequests' element={<SeeRequests />} />
           </Route>
           
           {/* --- ADMIN ONLY ROUTES --- */}
