@@ -15,9 +15,15 @@ export default function Navbar() {
     navigate("/login");
   };
 
-const isAdmin = user?.roles?.some(role => 
-  role.toLowerCase() === "admin" || role.toLowerCase() === "role_admin"
-);
+  // Lógica de Roles
+  const isAdmin = user?.roles?.some(role => 
+    role.toLowerCase() === "admin" || role.toLowerCase() === "role_admin"
+  );
+  
+  const isMentor = user?.roles?.some(role => 
+    role.toLowerCase() === "mentor" || role.toLowerCase() === "role_mentor"
+  );
+
   return (
     <nav className="bg-brokenWhite shadow-md border-b border-salviaGreen/30 sticky top-0 z-50">
       <div className="flex items-center justify-between px-6 py-4 lg:px-12">
@@ -56,16 +62,31 @@ const isAdmin = user?.roles?.some(role =>
                 {/* Info Usuario */}
                 <li className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100 mb-1">
                   {user.email} <br/>
-                  <span className="font-bold text-salviaGreen">{user.roles}</span>
+                  <span className="font-bold text-salviaGreen uppercase text-[9px]">{user.roles.join(', ')}</span>
                 </li>
 
-                {/* Opciones Generales */}
-                <li>
-                  <Link to="/findMentor" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                    <svg className="mr-2" width="20px" height="20px" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.545 15.467l-3.779-3.779a6.15 6.15 0 0 0 .898-3.21c0-3.417-2.961-6.377-6.378-6.377A6.185 6.185 0 0 0 2.1 8.287c0 3.416 2.961 6.377 6.377 6.377a6.15 6.15 0 0 0 3.115-.844l3.799 3.801a.953.953 0 0 0 1.346 0l.943-.943c.371-.371.236-.84-.135-1.211zM4.004 8.287a4.282 4.282 0 0 1 4.282-4.283c2.366 0 4.474 2.107 4.474 4.474a4.284 4.284 0 0 1-4.283 4.283c-2.366-.001-4.473-2.109-4.473-4.474z"/></svg> Find mentors
+                {/* --- OPCIONES SEGÚN ROL --- */}
+                
+                {/* 1. Opción Solo para Alumnos (No mentores ni admins) */}
+                {!isMentor && !isAdmin && (
+                  <li>
+                    <Link to="/findMentor" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
+                      <svg className="mr-2" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor"><path d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33-1.42 1.42-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/></svg> 
+                      Find mentors
+                    </Link>
+                  </li>
+                )}
 
-                  </Link>
-                </li>
+                {/* 2. Opciones Solo para Mentores */}
+                {isMentor && (
+                  <li>
+                    <Link to="/my-subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
+                      <i className="fa fa-book mr-2"></i> My Subjects
+                    </Link>
+                  </li>
+                )}
+
+                {/* 3. Opciones Comunes (Editar y Ver Solicitudes) */}
                 <li>
                   <Link to="/edit" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
                     <i className="fa fa-cog mr-2"></i> Edit Profile
@@ -73,8 +94,8 @@ const isAdmin = user?.roles?.some(role =>
                 </li>
                 <li>
                   <Link to="/seeRequests" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                    <i className="fa fa-archive mr-2"></i> See requests
-
+                    <i className="fa fa-archive mr-2"></i> 
+                    {isMentor ? "Manage Requests" : "My Requests"}
                   </Link>
                 </li>
 
@@ -82,15 +103,15 @@ const isAdmin = user?.roles?.some(role =>
                 {isAdmin && (
                   <>
                     <div className="h-px bg-slate-100 my-1"></div>
-                    <li className="px-4 py-1 text-[10px] font-bold text-slate-400 uppercase">Administración</li>
+                    <li className="px-4 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin Panel</li>
                     <li>
                       <Link to="/admin/subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-book mr-2 text-salviaGreen"></i> Gestionar Materias
+                        <i className="fa fa-list mr-2 text-salviaGreen"></i> All Subjects
                       </Link>
                     </li>
                     <li>
                       <Link to="/admin/approvals" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-check-circle mr-2 text-salviaGreen"></i> Validar Mentores
+                        <i className="fa fa-check-circle mr-2 text-salviaGreen"></i> Verify Mentors
                       </Link>
                     </li>
                   </>
@@ -117,8 +138,8 @@ const isAdmin = user?.roles?.some(role =>
         </button>
       </div>
 
-      {/* Menú móvil */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+      {/* Menú móvil adaptado */}
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="flex flex-col gap-2 px-6 pb-4">
           <Link to="/" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
 
@@ -130,16 +151,29 @@ const isAdmin = user?.roles?.some(role =>
           ) : (
             <>
               <div className="h-px bg-slate-200 my-2"></div>
-              {/* Rutas Admin Móvil */}
+              
+              {/* Lógica condicional móvil */}
               {isAdmin && (
-                <>
-                  <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 font-semibold text-slate-700">Gestionar Materias</Link>
-                  <Link to="/admin/approvals" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 font-semibold text-slate-700">Validar Mentores</Link>
-                </>
+                <div className="flex flex-col gap-1 mb-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase px-4">Admin</span>
+                  <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700">Subjects</Link>
+                  <Link to="/admin/approvals" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700">Approvals</Link>
+                </div>
               )}
+
               <Link to="/edit" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Edit Profile</Link>
-              <Link to="/findMentor" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Find mentor</Link>
-              <button onClick={handleLogout} className="py-2 px-4 rounded-lg bg-red-100 text-red-600 text-left">Logout</button>
+              
+              {isMentor ? (
+                <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">My Subjects</Link>
+              ) : !isAdmin && (
+                <Link to="/findMentor" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Find mentor</Link>
+              )}
+
+              <Link to="/seeRequests" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">
+                {isMentor ? "Manage Requests" : "My Requests"}
+              </Link>
+              
+              <button onClick={handleLogout} className="mt-2 py-2 px-4 rounded-lg bg-red-100 text-red-600 text-left font-bold">Logout</button>
             </>
           )}
         </div>
