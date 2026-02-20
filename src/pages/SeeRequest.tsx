@@ -10,14 +10,14 @@ export default function SeeRequests() {
     const [loading, setLoading] = useState(true);
 
     // 1. Identificación correcta del rol
-    const isMentor = user?.roles?.includes("MENTOR") ?? false;
+    const isMentor = user?.roles?.includes("mentor") ?? false;
 
     const getRequests = useCallback(async () => {
         if (!token) return;
         try {
             setLoading(true);
             const url = isMentor 
-                ? "http://localhost:8080/requests/mentor/all" 
+                ? "http://localhost:8080/requests/seeAll" 
                 : "http://localhost:8080/requests/seeAll";
 
             const res = await fetch(url, {
@@ -42,23 +42,28 @@ export default function SeeRequests() {
     useEffect(() => { getRequests(); }, [getRequests, user?.sub]);
 
     // 2. Acciones del Mentor
-    const handleStatusUpdate = async (id: number, action: 'accept' | 'reject') => {
-        try {
-            const res = await fetch(`http://localhost:8080/requests/${action}?requestId=${id}`, {
-                method: "PATCH",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) {
-                notify(`Solicitud ${action === 'accept' ? 'aceptada' : 'rechazada'}`, "success");
-                getRequests();
-            } else {
-                const errorData = await res.json();
-                notify(errorData.message || "Error al actualizar", "error");
-            }
-        } catch (error) {
-            notify("Error de conexión", "error");
+const handleStatusUpdate = async (id: number, action: 'book' | 'cancel') => {
+    try {
+        // CAMBIO AQUÍ: Si la acción es 'book' (Aceptar), llamamos a /accept
+        const endpoint = action === 'book' ? "accept" : "cancel";
+        const method = action === 'book' ? "POST" : "PATCH";
+        
+        const res = await fetch(`http://localhost:8080/requests/${endpoint}?requestId=${id}`, {
+            method: method,
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            notify(`Solicitud ${action === 'book' ? 'aceptada' : 'rechazada'}`, "success");
+            getRequests();
+        } else {
+            const errorData = await res.json();
+            notify(errorData.message || "Error al actualizar", "error");
         }
-    };
+    } catch (error) {
+        notify("Error de conexión", "error");
+    }
+};
 
     // 3. Acción del Alumno
     const handleCancel = async (id: number) => {
@@ -154,10 +159,10 @@ export default function SeeRequests() {
                                             <div className="flex gap-4">
                                                 {isMentor && req.status.toUpperCase() === 'PENDING' ? (
                                                     <>
-                                                        <button onClick={() => handleStatusUpdate(req.id, 'accept')} className="text-[10px] font-black text-green-600 hover:text-green-800 transition-all tracking-widest uppercase border-b border-green-600">
+                                                        <button onClick={() => handleStatusUpdate(req.id, 'book')} className="text-[10px] font-black text-green-600 hover:text-green-800 transition-all tracking-widest uppercase border-b border-green-600">
                                                             Aceptar
                                                         </button>
-                                                        <button onClick={() => handleStatusUpdate(req.id, 'reject')} className="text-[10px] font-black text-clayAccent hover:text-red-700 transition-all tracking-widest uppercase border-b border-clayAccent">
+                                                        <button onClick={() => handleStatusUpdate(req.id, 'cancel')} className="text-[10px] font-black text-clayAccent hover:text-red-700 transition-all tracking-widest uppercase border-b border-clayAccent">
                                                             Rechazar
                                                         </button>
                                                     </>
