@@ -18,7 +18,6 @@ const Step2: React.FC<StepProps> = ({
   values,
 }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
 
   console.log(values)
   // Traer materias desde la API
@@ -33,8 +32,6 @@ const Step2: React.FC<StepProps> = ({
       } catch (error) {
         notify("Error cargando materias", "error");
         setSubjects([]);
-      } finally {
-        setLoading(false);
       }
     };
 
