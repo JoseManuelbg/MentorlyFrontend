@@ -13,6 +13,7 @@ import SeeProfile from './pages/SeeProfile'
 import SeeRequests from './pages/SeeRequest'
 import ForgotPassword from './pages/ForgotPasswordEmail'
 import ResetPassword from './pages/ResetPassword'
+import ListUsersAdmin from './pages/ListUsers'
 function App() {
   return (
     <AuthProvider>
@@ -32,14 +33,19 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path='/' element={<Home />} />
             <Route path='/edit' element={<EditUser />} />
-            <Route path='/findMentor' element={<UserFinder />} />
-            <Route path='/seeRequests' element={<SeeRequests />} />
           </Route>
           
+          <Route element={<ProtectedRoute allowedRoles={["mentor", "student"]}/>}>
+            <Route path='/findMentor' element={<UserFinder />} />
+            <Route path='/seeRequests' element={<SeeRequests />} />
+
+          </Route>
+
           {/* --- ADMIN ONLY ROUTES --- */}
           {/* Use both variations to be safe, or match your Backend exactly */}
           <Route element={<ProtectedRoute allowedRoles={["admin", "ROLE_admin", "ADMIN", "ROLE_ADMIN"]} />}>
             <Route path='/admin/subjects' element={<AdminSubjects />} />
+            <Route path='/admin/listUsers' element={<ListUsersAdmin />}></Route>
           </Route>
 
           {/* --- FALLBACK --- */}

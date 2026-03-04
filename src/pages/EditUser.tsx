@@ -4,7 +4,7 @@ import { notify } from "../reusable/Notification";
 import { useNavigate } from "react-router-dom";
 
 export default function EditUserForm() {
-  const { user, token, logout } = useAuth();
+  const { token, logout } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
@@ -13,11 +13,11 @@ export default function EditUserForm() {
     name: "",
     username: "",
     password: "",
+    confirmPassword: "",
     email: "",
     role: "",
   });
 
-  // Usamos useCallback para evitar re-renders infinitos
   const fetchUser = useCallback(async () => {
     if (!token) return;
     try {
@@ -38,7 +38,8 @@ export default function EditUserForm() {
         name: data.name,
         username: data.username,
         email: data.email,
-        password: "", // La password se deja vacía por seguridad
+        password: "", 
+        confirmPassword: "", // <-- Inicializamos vacío
         role: data.role,
       });
     } catch (err) {
@@ -58,6 +59,13 @@ export default function EditUserForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // --- VALIDACIÓN DE CONTRASEÑAS ---
+    if (formData.password !== formData.confirmPassword) {
+      notify("Las contraseñas no coinciden", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -70,14 +78,12 @@ export default function EditUserForm() {
         body: JSON.stringify({
           name: formData.name,
           username: formData.username,
-          password: formData.password || null // Si está vacía, no se actualiza
+          password: formData.password || null 
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        // Aquí conectamos con tu GlobalControllerError (ApiError)
+        const data = await res.json();
         const errorData = (data as unknown) as { message: string };
         notify(errorData.message || "Error al actualizar", "error");
         return;
@@ -107,11 +113,12 @@ export default function EditUserForm() {
         <h1 className="text-2xl font-bold text-forestDark text-center">Mi Perfil</h1>
 
         <div className="space-y-4">
-          {/* Campos Editables */}
+          {/* Campos Dinámicos */}
           {[
-            { label: "Nombre Completo", name: "name", type: "text", val: formData.name, disabled: false },
-            { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, disabled: false },
-            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, disabled: false, placeholder: "Dejar en blanco para no cambiar" },
+            { label: "Nombre Completo", name: "name", type: "text", val: formData.name, placeholder: "" },
+            { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, placeholder: "" },
+            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, placeholder: "Dejar en blanco para no cambiar" },
+            { label: "Confirmar Contraseña", name: "confirmPassword", type: "password", val: formData.confirmPassword, placeholder: "Repite la contraseña" },
           ].map((field) => (
             <div key={field.name}>
               <label className="block text-xs font-bold text-forestDark/60 uppercase mb-1 ml-1">{field.label}</label>
@@ -126,7 +133,7 @@ export default function EditUserForm() {
             </div>
           ))}
 
-          {/* Campos Bloqueados (Regla de negocio HU 3) */}
+          {/* Campos Bloqueados */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
               <label className="block text-xs font-bold text-forestDark/40 uppercase mb-1 ml-1">Email</label>

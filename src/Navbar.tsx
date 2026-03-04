@@ -4,13 +4,14 @@ import { useAuth } from "./context/AuthContext";
 import "font-awesome/css/font-awesome.min.css";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // Menú móvil
   const { user, logout } = useAuth();
-  const [openU, setOpenU] = useState(false);
+  const [openU, setOpenU] = useState(false); // Menú usuario (desktop)
   const navigate = useNavigate();
 
   const handleLogout = () => {
     setOpenU(false);
+    setOpen(false);
     logout();
     navigate("/login");
   };
@@ -32,7 +33,7 @@ export default function Navbar() {
           Mentorly
         </Link>
 
-        {/* Links desktop */}
+        {/* --- LINKS DESKTOP --- */}
         <div className="hidden lg:flex lg:items-center lg:gap-6">
           <Link to="/" className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20 transition-colors duration-300">
             Home
@@ -57,27 +58,24 @@ export default function Navbar() {
                 <i className="fa fa-user" aria-hidden="true"></i>
               </button>
               
-              <ul className={`absolute right-0 mt-2 z-10 min-w-[200px] overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl focus:outline-none ${openU ? "block" : "hidden"}`}>
+              <ul className={`absolute right-0 mt-2 z-10 min-w-[220px] overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl focus:outline-none ${openU ? "block" : "hidden"}`}>
                 
                 {/* Info Usuario */}
                 <li className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100 mb-1">
-                  {user.email} <br/>
-                  <span className="font-bold text-salviaGreen uppercase text-[9px]">{user.roles.join(', ')}</span>
+                  <span className="block truncate">{user.email}</span>
+                  <span className="font-bold text-salviaGreen uppercase text-[9px]">{user.roles?.join(', ')}</span>
                 </li>
 
-                {/* --- OPCIONES SEGÚN ROL --- */}
-                
-                {/* 1. Opción Solo para Alumnos (No mentores ni admins) */}
+                {/* 1. Solo para Alumnos (No mentores ni admins) */}
                 {!isMentor && !isAdmin && (
                   <li>
                     <Link to="/findMentor" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                      <svg className="mr-2" width="20px" height="20px" viewBox="0 0 20 20" fill="currentColor"><path d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33-1.42 1.42-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/></svg> 
-                      Find mentors
+                      <i className="fa fa-search mr-2"></i> Find mentors
                     </Link>
                   </li>
                 )}
 
-                {/* 2. Opciones Solo para Mentores */}
+                {/* 2. Solo para Mentores */}
                 {isMentor && (
                   <li>
                     <Link to="/my-subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
@@ -86,19 +84,20 @@ export default function Navbar() {
                   </li>
                 )}
 
-                {/* 3. Opciones Comunes (Editar y Ver Solicitudes) */}
+                {/* 3. Opciones Comunes: Edit y See Requests (AQUÍ ESTABA EL ERROR) */}
                 <li>
                   <Link to="/edit" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
                     <i className="fa fa-cog mr-2"></i> Edit Profile
                   </Link>
                 </li>
+
                 <li>
                   <Link to="/seeRequests" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                    <i className="fa fa-archive mr-2"></i> 
+                    <i className="fa fa-envelope mr-2"></i> 
                     {isMentor ? "Manage Requests" : "My Requests"}
                   </Link>
                 </li>
-
+      
                 {/* --- SECCIÓN ADMIN --- */}
                 {isAdmin && (
                   <>
@@ -112,6 +111,11 @@ export default function Navbar() {
                     <li>
                       <Link to="/admin/approvals" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
                         <i className="fa fa-check-circle mr-2 text-salviaGreen"></i> Verify Mentors
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/admin/listUsers" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
+                        <i className="fa fa-users mr-2 text-salviaGreen"></i> See users
                       </Link>
                     </li>
                   </>
@@ -130,7 +134,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Botón móvil */}
+        {/* Botón menú móvil */}
         <button onClick={() => setOpen(!open)} className="lg:hidden px-3 py-2 rounded-md border border-salviaGreen text-salviaGreen hover:bg-salviaGreen hover:text-brokenWhite transition-all">
           <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
             <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
@@ -138,42 +142,54 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Menú móvil adaptado */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="flex flex-col gap-2 px-6 pb-4">
-          <Link to="/" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
+      {/* --- MENÚ MÓVIL --- */}
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="flex flex-col gap-2 px-6 pb-6 bg-white border-t border-slate-100">
+          <Link to="/" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
 
           {!user ? (
             <>
-              <Link to="/login" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20">Login</Link>
-              <Link to="/signup" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20">Sign Up</Link>
+              <Link to="/login" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Login</Link>
+              <Link to="/signup" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Sign Up</Link>
             </>
           ) : (
             <>
               <div className="h-px bg-slate-200 my-2"></div>
               
-              {/* Lógica condicional móvil */}
+              {/* Opciones Admin Móvil */}
               {isAdmin && (
                 <div className="flex flex-col gap-1 mb-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase px-4">Admin</span>
-                  <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700">Subjects</Link>
-                  <Link to="/admin/approvals" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700">Approvals</Link>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase px-4">Admin Panel</span>
+                  <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Subjects</Link>
+                  <Link to="/admin/approvals" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Approvals</Link>
+                  <Link to="/admin/listUsers" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">See users</Link>
                 </div>
               )}
 
-              <Link to="/edit" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Edit Profile</Link>
+              {/* Opciones Usuario Móvil */}
+              <Link to="/edit" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                <i className="fa fa-cog mr-2"></i> Edit Profile
+              </Link>
               
               {isMentor ? (
-                <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">My Subjects</Link>
+                <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                  <i className="fa fa-book mr-2"></i> My Subjects
+                </Link>
               ) : !isAdmin && (
-                <Link to="/findMentor" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">Find mentor</Link>
+                <Link to="/findMentor" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                  <i className="fa fa-search mr-2"></i> Find mentor
+                </Link>
               )}
 
-              <Link to="/seeRequests" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg hover:bg-slate-100">
+              {/* Link dinámico corregido */}
+              <Link to="/seeRequests" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                <i className="fa fa-envelope mr-2"></i>
                 {isMentor ? "Manage Requests" : "My Requests"}
               </Link>
               
-              <button onClick={handleLogout} className="mt-2 py-2 px-4 rounded-lg bg-red-100 text-red-600 text-left font-bold">Logout</button>
+              <button onClick={handleLogout} className="mt-4 py-3 px-4 rounded-lg bg-red-100 text-red-600 text-left font-bold">
+                <i className="fa fa-sign-out mr-2"></i> Logout
+              </button>
             </>
           )}
         </div>
