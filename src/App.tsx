@@ -14,6 +14,7 @@ import SeeRequests from './pages/SeeRequest'
 import ForgotPassword from './pages/ForgotPasswordEmail'
 import ResetPassword from './pages/ResetPassword'
 import ListUsersAdmin from './pages/ListUsers'
+import AuditTable from './pages/Logs'
 function App() {
   return (
     <AuthProvider>
@@ -46,6 +47,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["admin", "ROLE_admin", "ADMIN", "ROLE_ADMIN"]} />}>
             <Route path='/admin/subjects' element={<AdminSubjects />} />
             <Route path='/admin/listUsers' element={<ListUsersAdmin />}></Route>
+            <Route path='/admin/logs' element={<AuditTable />} />
           </Route>
 
           {/* --- FALLBACK --- */}

@@ -84,7 +84,7 @@ export default function Navbar() {
                   </li>
                 )}
 
-                {/* 3. Opciones Comunes: Edit y See Requests (AQUÍ ESTABA EL ERROR) */}
+                {/* 3. Opciones Comunes */}
                 <li>
                   <Link to="/edit" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
                     <i className="fa fa-cog mr-2"></i> Edit Profile
@@ -109,13 +109,14 @@ export default function Navbar() {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/admin/approvals" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-check-circle mr-2 text-salviaGreen"></i> Verify Mentors
+                      <Link to="/admin/listUsers" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
+                        <i className="fa fa-users mr-2 text-salviaGreen"></i> Manage Users
                       </Link>
                     </li>
+                    {/* NUEVO LINK: AUDITORÍA (H18) */}
                     <li>
-                      <Link to="/admin/listUsers" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-users mr-2 text-salviaGreen"></i> See users
+                      <Link to="/admin/logs" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
+                        <i className="fa fa-history mr-2 text-salviaGreen"></i> Audit Logs
                       </Link>
                     </li>
                   </>
@@ -143,7 +144,7 @@ export default function Navbar() {
       </div>
 
       {/* --- MENÚ MÓVIL --- */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0"}`}>
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="flex flex-col gap-2 px-6 pb-6 bg-white border-t border-slate-100">
           <Link to="/" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
 
@@ -161,8 +162,8 @@ export default function Navbar() {
                 <div className="flex flex-col gap-1 mb-2">
                   <span className="text-[10px] font-bold text-slate-400 uppercase px-4">Admin Panel</span>
                   <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Subjects</Link>
-                  <Link to="/admin/approvals" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Approvals</Link>
-                  <Link to="/admin/listUsers" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">See users</Link>
+                  <Link to="/admin/listUsers" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Users</Link>
+                  <Link to="/admin/logs" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Audit Logs</Link>
                 </div>
               )}
 
@@ -181,7 +182,6 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {/* Link dinámico corregido */}
               <Link to="/seeRequests" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
                 <i className="fa fa-envelope mr-2"></i>
                 {isMentor ? "Manage Requests" : "My Requests"}

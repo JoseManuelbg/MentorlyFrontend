@@ -66,6 +66,28 @@ export default function ListUsersAdmin() {
   }
 };
 
+const handleRoleChange = async (id: number, newRole: string) => {
+  const url = `http://localhost:8080/admin/users/update-role?id=${id}&newRole=${newRole}`;
+
+  try {
+    const response = await axios.patch(url, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (response.status === 200) {
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => 
+          user.id === id ? { ...user, roles: [newRole] } : user
+        )
+      );
+      notify(`Rol actualizado a ${newRole}`, "success");
+    }
+  } catch (error: any) {
+    const errorMsg = error.response?.data?.error || "Error al cambiar el rol";
+    notify(errorMsg, "error");
+  }
+};
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -129,20 +151,24 @@ export default function ListUsersAdmin() {
                   </span>
                 </td>
 
+                
                 <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {(user.roles ?? []).map((role: any, index) => {
-                      const roleName = typeof role === 'object' ? role.name : role;
-                      return (
-                        <span key={index} className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          roleName.includes("ADMIN") ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
-                        }`}>
-                          {roleName.replace("ROLE_", "")}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </td>
+  <select
+  value={(() => {
+    const roleRaw = user.roles?.[0] || "";
+    return (typeof roleRaw === 'string' ? roleRaw : roleRaw.name)
+      .replace("ROLE_", "")
+      .toLowerCase();
+  })()}
+  onChange={(e) => handleRoleChange(user.id, e.target.value)}
+  className="bg-gray-50 border border-gray-200 text-gray-700 text-[10px] font-bold rounded-lg block w-full p-1"
+>
+  <option>Select Role</option>
+  <option value="student">Student</option>
+  <option value="mentor">Mentor</option>
+  <option value="admin">Admin</option>
+</select>
+</td>
 
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">

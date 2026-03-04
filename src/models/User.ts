@@ -3,6 +3,6 @@ export interface User{
     email: string;
     name: string;
     username: string;
-    roles: string[];
+roles: Array<{ name: string }> | string[];
     active: number;
 }
