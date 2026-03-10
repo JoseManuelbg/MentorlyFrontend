@@ -15,6 +15,8 @@ import ForgotPassword from './pages/ForgotPasswordEmail'
 import ResetPassword from './pages/ResetPassword'
 import ListUsersAdmin from './pages/ListUsers'
 import AuditTable from './pages/Logs'
+import AdminValidation from './pages/AdminValidation'
+import BecomeMentorForm from './pages/BecomeMentorForm'
 function App() {
   return (
     <AuthProvider>
@@ -39,6 +41,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["mentor", "student"]}/>}>
             <Route path='/findMentor' element={<UserFinder />} />
             <Route path='/seeRequests' element={<SeeRequests />} />
+            <Route path="/become-mentor" element={<BecomeMentorForm />} />
 
           </Route>
 
@@ -48,6 +51,7 @@ function App() {
             <Route path='/admin/subjects' element={<AdminSubjects />} />
             <Route path='/admin/listUsers' element={<ListUsersAdmin />}></Route>
             <Route path='/admin/logs' element={<AuditTable />} />
+            <Route path="/admin/requests" element={<AdminValidation />} />
           </Route>
 
           {/* --- FALLBACK --- */}

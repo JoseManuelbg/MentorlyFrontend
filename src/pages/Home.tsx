@@ -25,6 +25,10 @@ export default function Home() {
     ["admin", "role_admin"].includes(role.toLowerCase())
   );
 
+  const isMentor = authUser?.roles.some(role => 
+    ["mentor", "role_mentor"].includes(role.toLowerCase())
+  );
+
   useEffect(() => {
     if (token && isAdmin) {
       fetchAdminData(token);
@@ -128,23 +132,38 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center">
-                <span className="text-xs text-white/40 font-bold uppercase tracking-widest">Usuarios Activos: {activeUsers}</span>
-                <Link to="/admin/requests" className="text-salviaGreen text-xs font-bold hover:underline">Ver detalles →</Link>
+                <span className="text-xs text-white/40 font-bold uppercase tracking-widest">Usuarios: {activeUsers}</span>
+                {/* BOTÓN PARA EL ADMIN: Ir a validar */}
+                <Link to="/admin/requests" className="bg-salviaGreen text-forestDark px-4 py-2 rounded-full text-[10px] font-black hover:bg-white transition-all no-underline">
+                  VALIDAR SOLICITUDES →
+                </Link>
             </div>
           </div>
         ) : (
-          /* Inspiración para Usuarios */
-          <div className="md:col-span-2 bg-salviaGreen p-10 rounded-[3rem] text-white shadow-xl flex flex-col justify-between">
-            <div>
-              <p className="text-white/60 text-[10px] font-black uppercase mb-4 tracking-widest">Inspiración</p>
-              <h3 className="text-2xl font-serif italic italic leading-snug">"{quote?.content || "El aprendizaje nunca agota la mente."}"</h3>
-              <p className="mt-4 font-bold text-sm">— {quote?.author || "Leonardo da Vinci"}</p>
+          <div className="md:col-span-2 flex flex-col gap-4">
+            {/* Inspiración */}
+            <div className="bg-salviaGreen p-10 rounded-[3rem] text-white shadow-xl">
+              <h3 className="text-2xl font-serif italic italic leading-snug">"{quote?.content}"</h3>
+              <p className="mt-4 font-bold text-sm">— {quote?.author}</p>
             </div>
-            <Link to="/subjects" className="mt-6 w-fit bg-white text-salviaGreen px-6 py-2 rounded-full text-xs font-black hover:bg-forestDark hover:text-white transition-all no-underline">
-              Ir a mis cursos
-            </Link>
+
+            {/* BOTÓN PARA EL ALUMNO: Si no es mentor, mostramos la invitación */}
+            {!isMentor && (
+  <Link 
+    to="/become-mentor" 
+    className="bg-white border-2 border-dashed border-salviaGreen p-8 rounded-[3rem] flex items-center justify-between group hover:bg-salviaGreen/5 transition-all no-underline"
+  >
+    <div>
+      <h4 className="font-black text-forestDark text-lg m-0">¿Quieres ser Mentor?</h4>
+      <p className="text-slate-400 text-xs m-0">Haz clic aquí para enviar tu solicitud.</p>
+    </div>
+    <span className="text-2xl group-hover:translate-x-2 transition-transform">🚀</span>
+  </Link>
+)}
           </div>
         )}
+
+        
 
         {/* Acciones Rápidas */}
         <Link to={isAdmin ? "/admin/subjects" : "/subjects"} className="bg-white p-8 rounded-[2.5rem] border border-sageGrey/30 flex flex-col items-center justify-center text-center group hover:bg-forestDark transition-all no-underline">
