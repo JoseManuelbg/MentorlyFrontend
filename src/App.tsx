@@ -17,6 +17,7 @@ import ListUsersAdmin from './pages/ListUsers'
 import AuditTable from './pages/Logs'
 import AdminValidation from './pages/AdminValidation'
 import BecomeMentorForm from './pages/BecomeMentorForm'
+import ManageAvailability from './pages/ManageAvailability'
 function App() {
   return (
     <AuthProvider>
@@ -42,6 +43,13 @@ function App() {
             <Route path='/findMentor' element={<UserFinder />} />
             <Route path='/seeRequests' element={<SeeRequests />} />
             <Route path="/become-mentor" element={<BecomeMentorForm />} />
+
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["mentor"]}/>}>
+            <Route path='/findMentor' element={<UserFinder />} />
+            <Route path='/seeRequests' element={<SeeRequests />} />
+            <Route path="/availability" element={<ManageAvailability />} />
 
           </Route>
 
