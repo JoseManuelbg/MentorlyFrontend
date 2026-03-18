@@ -13,7 +13,8 @@ export default function BecomeMentorForm() {
   const { token, user: authUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
   // Cambiamos a un Array para soportar varias materias
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<number[]>([]);
@@ -24,7 +25,7 @@ export default function BecomeMentorForm() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:8080/subjects", {
+    fetch(`${BASE_URL}/subjects`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => res.json())
@@ -49,7 +50,7 @@ export default function BecomeMentorForm() {
 
     try {
       // Ajusta la URL a la que definiste en tu @RequestMapping
-      const response = await fetch("http://localhost:8080/api/requests/apply", {
+      const response = await fetch(`${BASE_URL}/api/requests/apply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

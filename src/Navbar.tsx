@@ -77,11 +77,19 @@ export default function Navbar() {
 
                 {/* 2. Solo para Mentores */}
                 {isMentor && (
-                  <li>
-                    <Link to="/my-subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                      <i className="fa fa-book mr-2"></i> My Subjects
-                    </Link>
-                  </li>
+                  <>
+                    <li>
+                      <Link to="/my-subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
+                        <i className="fa fa-book mr-2"></i> My Subjects
+                      </Link>
+                    </li>
+                    {/* NUEVO LINK: DISPONIBILIDAD */}
+                    <li>
+                      <Link to="/availability" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
+                        <i className="fa fa-calendar mr-2"></i> Manage Availability
+                      </Link>
+                    </li>
+                  </>
                 )}
 
                 {/* 3. Opciones Comunes */}
@@ -113,7 +121,6 @@ export default function Navbar() {
                         <i className="fa fa-users mr-2 text-salviaGreen"></i> Manage Users
                       </Link>
                     </li>
-                    {/* NUEVO LINK: AUDITORÍA (H18) */}
                     <li>
                       <Link to="/admin/logs" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
                         <i className="fa fa-history mr-2 text-salviaGreen"></i> Audit Logs
@@ -144,7 +151,7 @@ export default function Navbar() {
       </div>
 
       {/* --- MENÚ MÓVIL --- */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="flex flex-col gap-2 px-6 pb-6 bg-white border-t border-slate-100">
           <Link to="/" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
 
@@ -173,9 +180,15 @@ export default function Navbar() {
               </Link>
               
               {isMentor ? (
-                <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                  <i className="fa fa-book mr-2"></i> My Subjects
-                </Link>
+                <>
+                  <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                    <i className="fa fa-book mr-2"></i> My Subjects
+                  </Link>
+                  {/* NUEVO LINK MÓVIL */}
+                  <Link to="/availability" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
+                    <i className="fa fa-calendar mr-2"></i> Manage Availability
+                  </Link>
+                </>
               ) : !isAdmin && (
                 <Link to="/findMentor" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
                   <i className="fa fa-search mr-2"></i> Find mentor

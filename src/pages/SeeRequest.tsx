@@ -8,6 +8,7 @@ export default function SeeRequests() {
     const { token, user } = useAuth();
     const [requests, setRequests] = useState<RequestDTO[]>([]);
     const [loading, setLoading] = useState(true);
+    const BASE_URL = import.meta.env.VITE_API_URL;
 
     // 1. Identificación correcta del rol
     const isMentor = user?.roles?.includes("mentor") ?? false;
@@ -17,8 +18,8 @@ export default function SeeRequests() {
         try {
             setLoading(true);
             const url = isMentor 
-                ? "http://localhost:8080/requests/seeAll" 
-                : "http://localhost:8080/requests/seeAll";
+                ? `${BASE_URL}/requests/seeAll` 
+                : `${BASE_URL}/requests/seeAll`;
 
             const res = await fetch(url, {
                 headers: { "Authorization": `Bearer ${token}` }
@@ -48,7 +49,7 @@ const handleStatusUpdate = async (id: number, action: 'book' | 'cancel') => {
         const endpoint = action === 'book' ? "accept" : "cancel";
         const method = action === 'book' ? "POST" : "PATCH";
         
-        const res = await fetch(`http://localhost:8080/requests/${endpoint}?requestId=${id}`, {
+        const res = await fetch(`${BASE_URL}/requests/${endpoint}?requestId=${id}`, {
             method: method,
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -69,7 +70,7 @@ const handleStatusUpdate = async (id: number, action: 'book' | 'cancel') => {
     const handleCancel = async (id: number) => {
         if (!window.confirm("¿Estás seguro de que deseas cancelar esta mentoría?")) return;
         try {
-            const res = await fetch(`http://localhost:8080/requests/cancel?requestId=${id}`, {
+            const res = await fetch(`${BASE_URL}/requests/cancel?requestId=${id}`, {
                 method: "PATCH",
                 headers: { "Authorization": `Bearer ${token}` }
             });

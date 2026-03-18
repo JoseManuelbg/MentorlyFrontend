@@ -21,11 +21,12 @@ export default function SeeProfile() {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+    const BASE_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         if (id) {
             setLoading(true);
-            fetch(`http://localhost:8080/users/seeProfile?id=${id}`)
+            fetch(`${BASE_URL}/users/seeProfile?id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     setProfile(data);
@@ -80,7 +81,7 @@ export default function SeeProfile() {
     };
 
         try {
-            const response = await fetch("http://localhost:8080/requests/book", {
+            const response = await fetch(`${BASE_URL}/requests/book`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

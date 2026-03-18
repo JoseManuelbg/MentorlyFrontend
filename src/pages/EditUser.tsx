@@ -8,6 +8,7 @@ export default function EditUserForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +22,7 @@ export default function EditUserForm() {
   const fetchUser = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8080/me", {
+      const res = await fetch(`${BASE_URL}/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -69,7 +70,7 @@ export default function EditUserForm() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/edit?email=${formData.email}`, {
+      const res = await fetch(`${BASE_URL}/edit?email=${formData.email}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

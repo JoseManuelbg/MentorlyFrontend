@@ -22,6 +22,8 @@ export default function ManageAvailability() {
   const [endTime, setEndTime] = useState("10:00");
   const [weeks, setWeeks] = useState(4);
   const [loading, setLoading] = useState(false);
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
 
   // Función para iluminar el calendario
   const isDateSelected = (date: Date) => {
@@ -54,7 +56,7 @@ export default function ManageAvailability() {
     
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/availabilities/bulk", {
+      const res = await fetch(`${BASE_URL}/api/availabilities/bulk`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

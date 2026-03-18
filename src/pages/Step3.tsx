@@ -16,6 +16,7 @@ interface StepProps {
 const Step3: React.FC<StepProps> = ({ prevStep, handleChange, values }) => {
   const navigate = useNavigate(); 
   const [loading, setLoading] = React.useState(false);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const submitForm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -57,7 +58,7 @@ const Step3: React.FC<StepProps> = ({ prevStep, handleChange, values }) => {
 
     try {
   // Guardar usuario en tu backend
-  const res = await fetch("http://localhost:8080/signup", {
+  const res = await fetch(`${BASE_URL}/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

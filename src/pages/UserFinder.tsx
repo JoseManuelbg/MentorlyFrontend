@@ -13,7 +13,8 @@ interface UserMatchDTO {
 const UserFinder: React.FC = () => {
   const [matches, setMatches] = useState<UserMatchDTO[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
   const { token, user } = useAuth();
 
   const fetchMatches = async () => {
@@ -21,7 +22,7 @@ const UserFinder: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/users/find`, {
+      const res = await fetch(`${BASE_URL}/users/find`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

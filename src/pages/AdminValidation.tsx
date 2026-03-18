@@ -16,6 +16,7 @@ export default function AdminValidation() {
   const { token } = useAuth();
   const [requests, setRequests] = useState<MentorRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchRequests();
@@ -23,7 +24,7 @@ export default function AdminValidation() {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/requests/pending", {
+      const res = await fetch(`${BASE_URL}/api/requests/pending`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -40,7 +41,7 @@ export default function AdminValidation() {
   const handleAction = async (requestId: number, userEmail: string, action: 'APPROVE' | 'REJECT') => {
     try {
       // Ajustamos la URL al endpoint de tu controlador de validación
-      const res = await fetch(`http://localhost:8080/api/requests/validate`, {
+      const res = await fetch(`${BASE_URL}/api/requests/validate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

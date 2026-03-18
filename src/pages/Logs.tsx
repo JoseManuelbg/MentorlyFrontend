@@ -15,6 +15,7 @@ export default function AuditTable() {
   const { token } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (token) fetchLogs();
@@ -23,7 +24,7 @@ export default function AuditTable() {
  const fetchLogs = async () => {
   try {
     console.log("Intentando recuperar logs con token:", token);
-    const res = await fetch("http://localhost:8080/admin/audit/all", {
+    const res = await fetch(`${BASE_URL}/admin/audit/all`, {
       method: "GET",
       headers: { 
         "Authorization": `Bearer ${token}`,

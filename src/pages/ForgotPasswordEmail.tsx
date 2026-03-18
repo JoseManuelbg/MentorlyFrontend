@@ -5,6 +5,8 @@ import emailjs from '@emailjs/browser';
 export default function ForgotPassword(){
 
     const [email, setEmail] = useState("");
+  const BASE_URL = import.meta.env.VITE_API_URL;
+  const APP_URL = import.meta.env.VITE_APP_URL;
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,7 +15,7 @@ export default function ForgotPassword(){
     }
 
     try {
-            const res = await fetch(`http://localhost:8080/forgot-password?email=${email}`, {
+            const res = await fetch(`${BASE_URL}/forgot-password?email=${email}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
         });
@@ -25,7 +27,7 @@ export default function ForgotPassword(){
             return;
         }
 
-        const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
+        const resetUrl = `${APP_URL}/reset-password?token=${token}`;
 
         await emailjs.send(
             "service_c2b7b8y",       

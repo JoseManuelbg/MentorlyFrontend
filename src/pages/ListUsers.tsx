@@ -9,10 +9,11 @@ export default function ListUsersAdmin() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { token } = useAuth();
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:8080/admin/users/all", {
+      const res = await fetch(`${BASE_URL}/admin/users/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
@@ -36,7 +37,7 @@ export default function ListUsersAdmin() {
   );
 
  const handleCancel = async (id: number) => {
-  const url = `http://localhost:8080/admin/users/toggle-status?id=${id}`;
+  const url = `${BASE_URL}/admin/users/toggle-status?id=${id}`;
 
   try {
     const response = await axios.patch(url, {}, {
@@ -67,7 +68,7 @@ export default function ListUsersAdmin() {
 };
 
 const handleRoleChange = async (id: number, newRole: string) => {
-  const url = `http://localhost:8080/admin/users/update-role?id=${id}&newRole=${newRole}`;
+  const url = `${BASE_URL}/admin/users/update-role?id=${id}&newRole=${newRole}`;
 
   try {
     const response = await axios.patch(url, {}, {

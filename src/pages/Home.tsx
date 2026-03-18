@@ -20,6 +20,7 @@ export default function Home() {
   const [activeUsers, setActiveUsers] = useState<number>(0);
   const [stats, setStats] = useState<MentorshipStats>({ active: 0, pending: 0, rejected: 0 });
   const [quote, setQuote] = useState<Quote>();
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const isAdmin = authUser?.roles.some(role => 
     ["admin", "role_admin"].includes(role.toLowerCase())
@@ -38,7 +39,7 @@ export default function Home() {
   const fetchAdminData = async (t: string) => {
     try {
       // 1. Usuarios Activos
-      const resUsers = await fetch("http://localhost:8080/users/stats/getActive", {
+      const resUsers = await fetch(`${BASE_URL}/users/stats/getActive`, {
         headers: { Authorization: `Bearer ${t}` }
       });
       if (resUsers.ok) {
@@ -48,7 +49,7 @@ export default function Home() {
 
       // 2. Estadísticas de Mentorías (Lo ideal es un endpoint que devuelva los 3 counts)
       // Si no tienes ese endpoint, puedes hacer 3 fetches aquí, pero uno unificado es mejor.
-      const resStats = await fetch("http://localhost:8080/requests/stats/all", {
+      const resStats = await fetch(`${BASE_URL}/requests/stats/all`, {
         headers: { Authorization: `Bearer ${t}` }
       });
       

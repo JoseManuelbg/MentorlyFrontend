@@ -13,12 +13,13 @@ const AdminSubjects: React.FC = () => {
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(null);
   const [newSubject, setNewSubject] = useState({ name: "", level: "PRIMARY" as Level });
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // --- PETICIONES API ---
 
   const fetchSubjects = async () => {
     try {
-      const res = await fetch("http://localhost:8080/subjects");
+      const res = await fetch(`${BASE_URL}/subjects`);
       if (!res.ok) throw new Error();
       const data: Subject[] = await res.json();
       setSubjects(data);
@@ -39,7 +40,7 @@ const AdminSubjects: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8080/subjects/admin", {
+      const res = await fetch(`${BASE_URL}/subjects/admin`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(newSubject),
@@ -65,7 +66,7 @@ const AdminSubjects: React.FC = () => {
     if (!editingSubject) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/subjects/admin/${editingSubject.id}`, {
+      const res = await fetch(`${BASE_URL}/subjects/admin/${editingSubject.id}`, {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(editingSubject),
@@ -88,7 +89,7 @@ const AdminSubjects: React.FC = () => {
   const confirmDelete = async () => {
     if (!subjectToDelete) return;
     try {
-      const res = await fetch(`http://localhost:8080/subjects/admin/${subjectToDelete.id}`, { 
+      const res = await fetch(`${BASE_URL}/subjects/admin/${subjectToDelete.id}`, { 
         method: "DELETE",
         headers: getHeaders()
       });
