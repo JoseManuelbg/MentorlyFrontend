@@ -26,7 +26,7 @@ const Step2: React.FC<StepProps> = ({
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const res = await fetch(`${BASE_URL}:8080/subjects`);
+        const res = await fetch(`${BASE_URL}/subjects`);
         if (!res.ok) throw new Error("Error fetching subjects");
 
         const data: Subject[] = await res.json();
