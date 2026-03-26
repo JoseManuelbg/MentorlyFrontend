@@ -1,207 +1,276 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
-import "font-awesome/css/font-awesome.min.css";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false); // Menú móvil
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
   const { user, logout } = useAuth();
-  const [openU, setOpenU] = useState(false); // Menú usuario (desktop)
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    setOpenU(false);
-    setOpen(false);
+    setAvatarOpen(false);
+    setMobileOpen(false);
     logout();
     navigate("/login");
   };
 
-  // Lógica de Roles
-  const isAdmin = user?.roles?.some(role => 
-    role.toLowerCase() === "admin" || role.toLowerCase() === "role_admin"
+  const isAdmin = user?.roles?.some(
+    (r) => r.toLowerCase() === "admin" || r.toLowerCase() === "role_admin"
   );
-  
-  const isMentor = user?.roles?.some(role => 
-    role.toLowerCase() === "mentor" || role.toLowerCase() === "role_mentor"
+  const isMentor = user?.roles?.some(
+    (r) => r.toLowerCase() === "mentor" || r.toLowerCase() === "role_mentor"
   );
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const linkBase =
+    "relative py-2 px-3 text-sm font-semibold transition-colors duration-200 rounded-lg";
+  const activeLink =
+    "text-salviaGreen bg-salviaGreen/10";
+  const inactiveLink =
+    "text-forestDark/70 hover:text-forestDark hover:bg-forestDark/5";
+
+  // Links según rol
+  const navLinks = () => {
+    if (!user) return null;
+
+    return (
+      <>
+        <Link
+          to="/"
+          className={`${linkBase} ${isActive("/") ? activeLink : inactiveLink}`}
+        >
+          Inicio
+        </Link>
+
+        {/* Alumno */}
+        {!isMentor && !isAdmin && (
+          <Link
+            to="/findMentor"
+            className={`${linkBase} ${isActive("/findMentor") ? activeLink : inactiveLink}`}
+          >
+            Buscar Mentor
+          </Link>
+        )}
+
+        {/* Mentor */}
+        {isMentor && (
+          <>
+            <Link
+              to="/my-subjects"
+              className={`${linkBase} ${isActive("/my-subjects") ? activeLink : inactiveLink}`}
+            >
+              Mis Materias
+            </Link>
+            <Link
+              to="/availability"
+              className={`${linkBase} ${isActive("/availability") ? activeLink : inactiveLink}`}
+            >
+              Disponibilidad
+            </Link>
+          </>
+        )}
+
+        {/* Común autenticado — no admin */}
+        {!isAdmin && (
+          <Link
+            to="/seeRequests"
+            className={`${linkBase} ${isActive("/seeRequests") ? activeLink : inactiveLink}`}
+          >
+            {isMentor ? "Solicitudes" : "Mis Solicitudes"}
+          </Link>
+        )}
+
+        {/* Admin */}
+        {isAdmin && (
+          <>
+            <Link
+              to="/admin/subjects"
+              className={`${linkBase} ${isActive("/admin/subjects") ? activeLink : inactiveLink}`}
+            >
+              Materias
+            </Link>
+            <Link
+              to="/admin/listUsers"
+              className={`${linkBase} ${isActive("/admin/listUsers") ? activeLink : inactiveLink}`}
+            >
+              Usuarios
+            </Link>
+            <Link
+              to="/admin/requests"
+              className={`${linkBase} ${isActive("/admin/requests") ? activeLink : inactiveLink}`}
+            >
+              Validaciones
+            </Link>
+            <Link
+              to="/admin/logs"
+              className={`${linkBase} ${isActive("/admin/logs") ? activeLink : inactiveLink}`}
+            >
+              Auditoría
+            </Link>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
-    <nav className="bg-brokenWhite shadow-md border-b border-salviaGreen/30 sticky top-0 z-50">
-      <div className="flex items-center justify-between px-6 py-4 lg:px-12">
+    <nav className="bg-white/80 backdrop-blur-md border-b border-sageGrey/20 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-16">
+
         {/* Logo */}
-        <Link to="/" className="font-extrabold text-2xl text-slate-700 tracking-wide">
+        <Link
+          to="/"
+          className="font-black text-xl tracking-tight text-forestDark flex items-center gap-2 shrink-0"
+        >
+          <span className="w-7 h-7 rounded-lg bg-salviaGreen flex items-center justify-center text-white text-xs font-black">M</span>
           Mentorly
         </Link>
 
-        {/* --- LINKS DESKTOP --- */}
-        <div className="hidden lg:flex lg:items-center lg:gap-6">
-          <Link to="/" className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20 transition-colors duration-300">
-            Home
-          </Link>
+        {/* Links Desktop */}
+        <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+          {navLinks()}
+        </div>
 
+        {/* Derecha: Sin sesión o Avatar */}
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
           {!user ? (
             <>
-              <Link to="/login" className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20 transition-colors duration-300">
-                Login
+              <Link
+                to="/login"
+                className="py-2 px-4 text-sm font-semibold text-forestDark/70 hover:text-forestDark rounded-lg hover:bg-forestDark/5 transition-colors"
+              >
+                Iniciar sesión
               </Link>
-              <Link to="/signup" className="py-2 px-4 rounded-lg hover:bg-salviaGreen/20 transition-colors duration-300">
-                Sign Up
+              <Link
+                to="/signup"
+                className="py-2 px-5 text-sm font-bold bg-salviaGreen text-white rounded-full hover:bg-salviaGreen/90 transition-colors shadow-sm"
+              >
+                Registrarse
               </Link>
             </>
           ) : (
-            <div className="relative inline-block">
+            <div className="relative">
               <button
-                onClick={() => setOpenU(!openU)}
-                className="rounded-full size-11 bg-slate-800 flex items-center justify-center text-white transition-all shadow-md hover:bg-slate-700 ml-2"
-                type="button"
+                onClick={() => setAvatarOpen(!avatarOpen)}
+                className="w-10 h-10 rounded-full bg-forestDark text-white flex items-center justify-center font-black text-sm hover:bg-forestDark/80 transition-all shadow-md ring-2 ring-white ring-offset-1 ring-offset-salviaGreen/20"
+                title={user.email}
               >
-                <i className="fa fa-user" aria-hidden="true"></i>
+                {user.sub?.charAt(0).toUpperCase() ?? "U"}
               </button>
-              
-              <ul className={`absolute right-0 mt-2 z-10 min-w-[220px] overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl focus:outline-none ${openU ? "block" : "hidden"}`}>
-                
-                {/* Info Usuario */}
-                <li className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100 mb-1">
-                  <span className="block truncate">{user.email}</span>
-                  <span className="font-bold text-salviaGreen uppercase text-[9px]">{user.roles?.join(', ')}</span>
-                </li>
 
-                {/* 1. Solo para Alumnos (No mentores ni admins) */}
-                {!isMentor && !isAdmin && (
-                  <li>
-                    <Link to="/findMentor" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                      <i className="fa fa-search mr-2"></i> Find mentors
-                    </Link>
-                  </li>
-                )}
+              {/* Dropdown Avatar */}
+              {avatarOpen && (
+                <>
+                  {/* Overlay para cerrar */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setAvatarOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl border border-sageGrey/20 shadow-xl z-20 overflow-hidden">
+                    {/* Header usuario */}
+                    <div className="px-4 py-3 bg-forestDark/3 border-b border-sageGrey/10">
+                      <p className="text-xs font-black text-forestDark truncate">{user.sub}</p>
+                      <p className="text-[10px] text-salviaGreen font-bold uppercase tracking-widest mt-0.5">
+                        {user.roles?.map((r) => r.replace("ROLE_", "")).join(" · ")}
+                      </p>
+                    </div>
 
-                {/* 2. Solo para Mentores */}
-                {isMentor && (
-                  <>
-                    <li>
-                      <Link to="/my-subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                        <i className="fa fa-book mr-2"></i> My Subjects
+                    <div className="p-1.5 flex flex-col gap-0.5">
+                      <Link
+                        to="/edit"
+                        onClick={() => setAvatarOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-forestDark rounded-xl hover:bg-slate-50 transition-colors font-medium"
+                      >
+                        <span className="text-base">⚙️</span> Editar perfil
                       </Link>
-                    </li>
-                    {/* NUEVO LINK: DISPONIBILIDAD */}
-                    <li>
-                      <Link to="/availability" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                        <i className="fa fa-calendar mr-2"></i> Manage Availability
-                      </Link>
-                    </li>
-                  </>
-                )}
 
-                {/* 3. Opciones Comunes */}
-                <li>
-                  <Link to="/edit" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                    <i className="fa fa-cog mr-2"></i> Edit Profile
-                  </Link>
-                </li>
+                      <div className="h-px bg-slate-100 my-1" />
 
-                <li>
-                  <Link to="/seeRequests" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-slate-100 transition-all text-slate-800">
-                    <i className="fa fa-envelope mr-2"></i> 
-                    {isMentor ? "Manage Requests" : "My Requests"}
-                  </Link>
-                </li>
-      
-                {/* --- SECCIÓN ADMIN --- */}
-                {isAdmin && (
-                  <>
-                    <div className="h-px bg-slate-100 my-1"></div>
-                    <li className="px-4 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin Panel</li>
-                    <li>
-                      <Link to="/admin/subjects" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-list mr-2 text-salviaGreen"></i> All Subjects
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/admin/listUsers" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-users mr-2 text-salviaGreen"></i> Manage Users
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/admin/logs" onClick={() => setOpenU(false)} className="flex w-full text-sm items-center rounded-md p-3 hover:bg-salviaGreen/10 transition-all text-slate-800">
-                        <i className="fa fa-history mr-2 text-salviaGreen"></i> Audit Logs
-                      </Link>
-                    </li>
-                  </>
-                )}
-
-                <div className="h-px bg-slate-100 my-1"></div>
-                
-                {/* Logout */}
-                <li>
-                  <button onClick={handleLogout} className="flex w-full text-sm items-center rounded-md p-3 bg-red-50 hover:bg-red-100 text-red-600 transition-all">
-                    <i className="fa fa-sign-out mr-2"></i> Logout
-                  </button>
-                </li>
-              </ul>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-600 rounded-xl hover:bg-red-50 transition-colors font-medium w-full text-left"
+                      >
+                        <span className="text-base">🚪</span> Cerrar sesión
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
 
-        {/* Botón menú móvil */}
-        <button onClick={() => setOpen(!open)} className="lg:hidden px-3 py-2 rounded-md border border-salviaGreen text-salviaGreen hover:bg-salviaGreen hover:text-brokenWhite transition-all">
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
-            <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-          </svg>
+        {/* Hamburguesa móvil */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl border border-sageGrey/30 hover:bg-salviaGreen/10 transition-colors"
+          aria-label="Menú"
+        >
+          <span className={`block w-5 h-0.5 bg-forestDark transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block w-5 h-0.5 bg-forestDark transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-5 h-0.5 bg-forestDark transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
-      {/* --- MENÚ MÓVIL --- */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="flex flex-col gap-2 px-6 pb-6 bg-white border-t border-slate-100">
-          <Link to="/" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Home</Link>
-
+      {/* Menú móvil */}
+      <div
+        className={`lg:hidden transition-all duration-300 overflow-hidden ${
+          mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="px-6 pb-6 pt-2 bg-white border-t border-slate-100 flex flex-col gap-1">
           {!user ? (
             <>
-              <Link to="/login" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Login</Link>
-              <Link to="/signup" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-salviaGreen/20">Sign Up</Link>
+              <Link to="/" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-salviaGreen/10 font-semibold text-forestDark">Inicio</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-salviaGreen/10 font-semibold text-forestDark">Iniciar sesión</Link>
+              <Link to="/signup" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl bg-salviaGreen text-white font-bold text-center mt-2">Registrarse</Link>
             </>
           ) : (
             <>
-              <div className="h-px bg-slate-200 my-2"></div>
-              
-              {/* Opciones Admin Móvil */}
-              {isAdmin && (
-                <div className="flex flex-col gap-1 mb-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase px-4">Admin Panel</span>
-                  <Link to="/admin/subjects" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Subjects</Link>
-                  <Link to="/admin/listUsers" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Users</Link>
-                  <Link to="/admin/logs" onClick={() => setOpen(false)} className="py-2 px-4 rounded-lg bg-salviaGreen/10 text-slate-700 ml-2">Audit Logs</Link>
+              {/* Info usuario móvil */}
+              <div className="flex items-center gap-3 py-3 px-4 mb-1 bg-forestDark/3 rounded-xl">
+                <div className="w-9 h-9 rounded-full bg-forestDark text-white flex items-center justify-center font-black text-sm shrink-0">
+                  {user.sub?.charAt(0).toUpperCase() ?? "U"}
                 </div>
-              )}
+                <div className="overflow-hidden">
+                  <p className="text-sm font-black text-forestDark truncate">{user.sub}</p>
+                  <p className="text-[10px] text-salviaGreen font-bold uppercase">{user.roles?.map((r) => r.replace("ROLE_", "")).join(" · ")}</p>
+                </div>
+              </div>
 
-              {/* Opciones Usuario Móvil */}
-              <Link to="/edit" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                <i className="fa fa-cog mr-2"></i> Edit Profile
-              </Link>
-              
-              {isMentor ? (
+              <Link to="/" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">🏠 Inicio</Link>
+
+              {!isMentor && !isAdmin && (
+                <Link to="/findMentor" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">🔍 Buscar Mentor</Link>
+              )}
+              {isMentor && (
                 <>
-                  <Link to="/my-subjects" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                    <i className="fa fa-book mr-2"></i> My Subjects
-                  </Link>
-                  {/* NUEVO LINK MÓVIL */}
-                  <Link to="/availability" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                    <i className="fa fa-calendar mr-2"></i> Manage Availability
-                  </Link>
+                  <Link to="/my-subjects" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">📚 Mis Materias</Link>
+                  <Link to="/availability" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">📅 Disponibilidad</Link>
                 </>
-              ) : !isAdmin && (
-                <Link to="/findMentor" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                  <i className="fa fa-search mr-2"></i> Find mentor
-                </Link>
+              )}
+              {!isAdmin && (
+                <Link to="/seeRequests" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">✉️ {isMentor ? "Solicitudes" : "Mis Solicitudes"}</Link>
+              )}
+              <Link to="/edit" onClick={() => setMobileOpen(false)} className="py-3 px-4 rounded-xl hover:bg-slate-50 font-semibold text-forestDark">⚙️ Editar Perfil</Link>
+
+              {isAdmin && (
+                <>
+                  <div className="h-px bg-slate-100 my-2" />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 mb-1">Admin</p>
+                  <Link to="/admin/subjects" onClick={() => setMobileOpen(false)} className="py-2.5 px-4 rounded-xl bg-salviaGreen/8 hover:bg-salviaGreen/15 font-semibold text-forestDark ml-2">📋 Materias</Link>
+                  <Link to="/admin/listUsers" onClick={() => setMobileOpen(false)} className="py-2.5 px-4 rounded-xl bg-salviaGreen/8 hover:bg-salviaGreen/15 font-semibold text-forestDark ml-2">👥 Usuarios</Link>
+                  <Link to="/admin/requests" onClick={() => setMobileOpen(false)} className="py-2.5 px-4 rounded-xl bg-salviaGreen/8 hover:bg-salviaGreen/15 font-semibold text-forestDark ml-2">✅ Validaciones</Link>
+                  <Link to="/admin/logs" onClick={() => setMobileOpen(false)} className="py-2.5 px-4 rounded-xl bg-salviaGreen/8 hover:bg-salviaGreen/15 font-semibold text-forestDark ml-2">📜 Auditoría</Link>
+                </>
               )}
 
-              <Link to="/seeRequests" onClick={() => setOpen(false)} className="py-3 px-4 rounded-lg hover:bg-slate-100">
-                <i className="fa fa-envelope mr-2"></i>
-                {isMentor ? "Manage Requests" : "My Requests"}
-              </Link>
-              
-              <button onClick={handleLogout} className="mt-4 py-3 px-4 rounded-lg bg-red-100 text-red-600 text-left font-bold">
-                <i className="fa fa-sign-out mr-2"></i> Logout
+              <div className="h-px bg-slate-100 my-2" />
+              <button onClick={handleLogout} className="py-3 px-4 rounded-xl bg-red-50 text-red-600 font-bold text-left hover:bg-red-100 transition-colors">
+                🚪 Cerrar sesión
               </button>
             </>
           )}

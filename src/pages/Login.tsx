@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import type { AuthResponse } from "../models/AuthResponse";
 import { notify } from "../reusable/Notification";
-
+import type { ApiError } from "../models/ApiError";
 
 export default function Login() {
   const { login } = useAuth();
@@ -13,44 +13,42 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_URL;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validación básica inicial
-    if (!email || !password) {
-      notify("Todos los campos son obligatorios", "error");
+  if (!email || !password) {
+    notify("Todos los campos son obligatorios", "error");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await fetch(`${BASE_URL}/signin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const errorData = data as ApiError;
+      notify(errorData.message || "Error al iniciar sesión", "error");
       return;
     }
 
-    try {
-      setLoading(true);
-      const res = await fetch(`${BASE_URL}/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    // Éxito
+    login(data as AuthResponse);
+    notify("¡Bienvenido de nuevo!", "success");
+    navigate("/");
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errorData = (data as unknown) as { message: string };
-        notify(errorData.message || "Credenciales incorrectas", "error");
-        return;
-      }
-
-      // Si el login es exitoso
-      login(data as AuthResponse);
-      notify("¡Bienvenido de nuevo!", "success");
-      navigate("/");
-
-    } catch (err) {
-      notify("No se pudo conectar con el servidor", "error");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (err) {
+    notify("No se pudo conectar con el servidor. Revisa tu conexión.", "error");
+    console.error("Network Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
    return (
 
 <div className="bg-salviaGreen min-h-screen flex items-center justify-center p-4">
