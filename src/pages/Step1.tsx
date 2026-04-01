@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { name } from "../reusable/regex";
 import type { FormData } from "./MultiStepForm";
 import { notify } from "../reusable/Notification";
@@ -12,11 +12,13 @@ interface Step1Props {
 }
 
 const Step1: React.FC<Step1Props> = ({ nextStep, handleChange, values }) => {
-  
-  // Forzamos que el rol sea STUDENT al cargar el componente
+  const [isChecking, setIsChecking] = useState(false);
+
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     if (values.role !== "STUDENT") {
-      // Simulamos un evento para actualizar el estado global a STUDENT
       const fakeEvent = {
         target: { value: "STUDENT" }
       } as React.ChangeEvent<HTMLSelectElement>;
@@ -24,7 +26,7 @@ const Step1: React.FC<Step1Props> = ({ nextStep, handleChange, values }) => {
     }
   }, []);
 
-  const continueStep = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const continueStep = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     // 1. Validar campos obligatorios
@@ -45,13 +47,33 @@ const Step1: React.FC<Step1Props> = ({ nextStep, handleChange, values }) => {
       return;
     }
 
-    // Si todo está ok, avanzamos
+    // 4. Comprobar si el username ya existe
+    setIsChecking(true);
+    try {
+  const res = await fetch(`${BASE_URL}/users/check-username?username=${encodeURIComponent(values.username)}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    notify(data.error ?? "Could not verify the username.", "error");
+    return;
+  }
+
+  if (data.exists) {
+    notify("That username is already taken. Please choose another.", "error");
+    return;
+  }
+} catch {
+  notify("Network error. Please check your connection.", "error");
+  return;
+}finally{
+  setIsChecking(false);
+}
+
     nextStep();
   };
 
   return (
     <div className="bg-salviaGreen h-screen overflow-hidden flex items-center justify-center">
-      {/* Step indicator (Simplificado para brevedad) */}
       <div className="absolute top-1/2 -translate-y-72 flex items-center gap-4">
         <div className="w-12 h-12 rounded-full bg-salviaGreen text-brokenWhite flex items-center justify-center font-bold shadow-[0_0_20px_rgba(126,144,118,0.8)] ring-4 ring-brokenWhite/50">1</div>
         <div className="w-10 h-[2px] bg-brokenWhite/50"></div>
@@ -103,19 +125,19 @@ const Step1: React.FC<Step1Props> = ({ nextStep, handleChange, values }) => {
           />
         </div>
 
-        {/* INFO ROLE: Informamos al usuario de su rol por defecto */}
         <div className="mt-2 p-3 bg-salviaGreen/10 rounded-lg border border-salviaGreen/20">
           <p className="text-xs text-gray-600">
-            <strong>Note:</strong> You are registering as a <strong>Student</strong>. 
+            <strong>Note:</strong> You are registering as a <strong>Student</strong>.
             You can request to become a Teacher later from your profile.
           </p>
         </div>
 
         <button
           onClick={continueStep}
-          className="w-full mt-4 inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-white/20 text-gray-800 rounded-lg transition-all duration-300 hover:bg-salviaGreen hover:text-white"
+          disabled={isChecking}
+          className="w-full mt-4 inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-white/20 text-gray-800 rounded-lg transition-all duration-300 hover:bg-salviaGreen hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Next
+          {isChecking ? "Checking..." : "Next"}
         </button>
       </form>
     </div>

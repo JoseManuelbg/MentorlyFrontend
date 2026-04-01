@@ -3,10 +3,16 @@ import { useAuth } from "../context/AuthContext";
 import { notify } from "../reusable/Notification";
 import { Link } from "react-router-dom";
 
+
+interface Subject {
+  id: number;
+  name: string;
+  level: string;
+}
 interface MentorRequest {
-  id: number; // En Java usamos Integer, aquí number
+  id: number; 
   userEmail: string;
-  subjectIds: string; // Importante: Viene como "1,2,5"
+  subjectIds: string; 
   academicLevel: string;
   description: string;
   status: string;
@@ -17,10 +23,14 @@ export default function AdminValidation() {
   const [requests, setRequests] = useState<MentorRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const BASE_URL = import.meta.env.VITE_API_URL;
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+
 
   useEffect(() => {
     fetchRequests();
   }, [token]);
+
+
 
   const fetchRequests = async () => {
     try {
@@ -37,6 +47,16 @@ export default function AdminValidation() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/subjects`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => setSubjects(data))
+    .catch(() => notify("Error al cargar materias", "error"));
+  }, [token]);
+
 
   const handleAction = async (requestId: number, userEmail: string, action: 'APPROVE' | 'REJECT') => {
     try {
@@ -87,7 +107,7 @@ export default function AdminValidation() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {req.subjectIds ? req.subjectIds.split(",").map((id, i) => (
                     <span key={i} className="text-salviaGreen font-bold text-xs bg-salviaGreen/10 px-2 py-0.5 rounded-lg">
-                      #ID_{id.trim()}
+                      {subjects.filter(sub => (sub.id.toString() === id)).at(0)?.name}
                     </span>
                   )) : (
                     <span className="text-slate-400 text-xs">Sin materias</span>

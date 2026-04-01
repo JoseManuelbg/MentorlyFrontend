@@ -16,11 +16,15 @@ export default function BecomeMentorForm() {
   const BASE_URL = import.meta.env.VITE_API_URL;
 
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+  
+
+  const [level, setLevel] = useState('primary');
+
   // Cambiamos a un Array para soportar varias materias
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<number[]>([]);
 
   const [formData, setFormData] = useState({
-    level: "PRIMARY",
+    level: level,
     motivation: ""
   });
 
@@ -39,6 +43,10 @@ export default function BecomeMentorForm() {
       prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
     );
   };
+
+  const filteredSubject = availableSubjects.filter(sub =>
+    sub.level.toLocaleLowerCase().includes(level.toLowerCase())
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +97,7 @@ export default function BecomeMentorForm() {
           <div>
             <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Materias a impartir</label>
             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-brokenWhite rounded-2xl">
-              {availableSubjects.map(sub => (
+              {filteredSubject.map(sub => (
                 <div 
                   key={sub.id}
                   onClick={() => toggleSubject(sub.id)}
@@ -109,7 +117,7 @@ export default function BecomeMentorForm() {
             <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Tu nivel académico actual</label>
             <select 
               className="w-full bg-brokenWhite border-none rounded-2xl p-4 text-forestDark focus:ring-2 focus:ring-salviaGreen outline-none font-semibold"
-              onChange={(e) => setFormData({...formData, level: e.target.value})}
+              onChange={(e) => setLevel(e.target.value)}
             >
               <option value="PRIMARY">Primaria</option>
               <option value="SECONDARY">Secundaria</option>

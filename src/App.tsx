@@ -43,7 +43,7 @@ function App() {
             <Route path='/findMentor' element={<UserFinder />} />
             <Route path='/seeRequests' element={<SeeRequests />} />
             <Route path="/become-mentor" element={<BecomeMentorForm />} />
-
+            <Route path="/subjects" element={<AdminSubjects />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={["mentor"]}/>}>

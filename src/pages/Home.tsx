@@ -182,9 +182,10 @@ export default function Home() {
             <span className="text-3xl mb-3 group-hover:scale-110 transition-transform">👥</span>
             <p className="text-forestDark group-hover:text-white font-black text-lg m-0">Usuarios</p>
           </Link>
+        
         )}
-
-        <Link 
+        {isAdmin && (
+          <Link 
   to="/admin/logs" 
   className="bg-white p-8 rounded-[2.5rem] border border-sageGrey/30 flex flex-col items-center justify-center text-center group hover:bg-orange-400 transition-all duration-500 shadow-sm no-underline"
 >
@@ -194,6 +195,8 @@ export default function Home() {
   <p className="text-forestDark group-hover:text-white font-black text-xl m-0">Auditoría</p>
   <p className="text-slate-400 group-hover:text-white/80 text-xs m-0 mt-1 uppercase tracking-tighter font-bold">Historial de cambios</p>
 </Link>
+        )}
+        
 
       </div>
     </div>
