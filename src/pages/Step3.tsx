@@ -4,6 +4,7 @@ import type { FormData } from "./MultiStepForm";
 import { notify } from "../reusable/Notification";
 import { validEmail, validPassword } from "../reusable/regex";
 import emailjs from "@emailjs/browser";
+import type { ApiError } from "../models/ApiError";
 
 interface StepProps {
   prevStep: () => void;
@@ -20,82 +21,78 @@ const Step3: React.FC<StepProps> = ({ prevStep, handleChange, values }) => {
 
   const submitForm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setLoading(true);
 
-    // Validaciones
+    // 1. Validaciones locales
     if (!values.email || !values.password || !values.passwordRe) {
-      notify("Email and password are required", "error");
-      setLoading(false);
-      return;
+      return notify("El email y la contraseña son obligatorios", "error");
     }
     if (!validEmail.test(values.email)) {
-      notify("The provided email is not valid.", "error");
-      setLoading(false);
-      return;
+      return notify("El formato del email no es válido.", "error");
     }
-    if (!validPassword.test(values.password) || !validPassword.test(values.passwordRe)) {
-      notify(
-        "Password must have at least 6 chars, 1 letter, 1 number, 1 special char",
-        "error"
-      );
-      setLoading(false);
-      return;
+    if (!validPassword.test(values.password)) {
+      return notify("La contraseña debe tener al menos 6 caracteres, 1 letra, 1 número y 1 especial", "error");
     }
     if (values.password !== values.passwordRe) {
-      notify("Passwords don't match", "error");
-      setLoading(false);
-      return;
+      return notify("Las contraseñas no coinciden", "error");
     }
 
+    setLoading(true);
+
     const payload = {
-  name: values.name + " " + values.surname, 
-  email: values.email,                      
-  role: values.role || "user",              
-  username: values.username,               
-  password: values.password,                
-  subjects: values.subjects || []           
-};
+      name: values.name + " " + values.surname, 
+      email: values.email,                      
+      role: values.role || "STUDENT",              
+      username: values.username,               
+      password: values.password,                
+      subjects: values.subjects || []           
+    };
 
     try {
-  // Guardar usuario en tu backend
-  const res = await fetch(`${BASE_URL}/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Failed to save user");
+      // 2. Guardar usuario en el backend
+      const res = await fetch(`${BASE_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-  // Enviar email de confirmación con EmailJS
-  await emailjs.send(
-    "service_c2b7b8y",       
-    "template_reblczb",      
-    {
-      email: values.email,               
-      name: values.name + " " + values.surname,
-    },
-    "fI1c9TlnKEMyykZn-"        
-  );
+      const data = await res.json();
 
-  notify("User created successfully and confirmation email sent", "success");
-  navigate("/login"); // solo si todo sale bien
-} catch (error) {
-  console.error(error);
-  notify("Failed to create user or send email", "error");
-} finally {
-  setLoading(false);
-}
+      // --- CAPTURA DE ERROR DEL BACKEND ---
+      if (!res.ok) {
+        const errorData = data as ApiError;
+        notify(errorData.message || "Error al crear la cuenta", "error");
+        setLoading(false);
+        return; 
+      }
 
+      // 3. Si el registro fue bien, enviar email con EmailJS
+      try {
+        await emailjs.send(
+          "service_c2b7b8y",       
+          "template_reblczb",      
+          {
+            email: values.email,               
+            name: values.name + " " + values.surname,
+          },
+          "fI1c9TlnKEMyykZn-"        
+        );
+      } catch (mailErr) {
+        console.error("Error enviando email:", mailErr);
+        // No bloqueamos el flujo si el mail falla pero el user ya se creó
+      }
+
+      notify("¡Cuenta creada con éxito! Revisa tu correo.", "success");
+      navigate("/login");
+
+    } catch (error) {
+      console.error(error);
+      notify("No se pudo conectar con el servidor", "error");
+    } finally {
+      setLoading(false);
+    }
   };
-
   return (
     <div className="bg-salviaGreen min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute top-64 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-brokenWhite/40 flex items-center justify-center font-semibold">1</div>
-        <div className="w-10 h-[2px] bg-brokenWhite/40"></div>
-        <div className="w-10 h-10 rounded-full bg-brokenWhite/40 flex items-center justify-center font-semibold">2</div>
-        <div className="w-10 h-[2px] bg-brokenWhite/40"></div>
-        <div className="w-12 h-12 rounded-full bg-salviaGreen text-brokenWhite flex items-center justify-center font-bold ring-4 ring-brokenWhite/60 shadow-[0_0_20px_rgba(126,144,118,0.9)]">3</div>
-      </div>
 
       <form className="backdrop-blur-lg bg-brokenWhite/70 p-8 rounded-2xl shadow-xl w-96 flex flex-col gap-5">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">Cuenta</h2>

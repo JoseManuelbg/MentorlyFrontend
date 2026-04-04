@@ -67,34 +67,10 @@ PRIMARY: [],
 
 
   return (
-  <div className="bg-salviaGreen min-h-screen overflow-y-auto py-16 flex flex-col items-center">
+  <div className="bg-salviaGreen w-full h-full min-h-screen overflow-y-auto py-16 flex flex-col items-center">
 
-    {/* Step indicator */}
-    <div className="flex items-center gap-4 mb-12">
-      <div className="w-10 h-10 rounded-full bg-brokenWhite/40 flex items-center justify-center font-semibold">
-        1
-      </div>
-
-      <div className="w-10 h-[2px] bg-brokenWhite/50"></div>
-
-      <div className="
-        w-12 h-12 rounded-full
-        bg-salviaGreen
-        text-brokenWhite
-        flex items-center justify-center
-        font-bold
-        ring-4 ring-brokenWhite/50
-        shadow-[0_0_20px_rgba(126,144,118,0.8)]
-      ">
-        2
-      </div>
-
-      <div className="w-10 h-[2px] bg-brokenWhite/30"></div>
-
-      <div className="w-10 h-10 rounded-full bg-brokenWhite/30 flex items-center justify-center font-semibold">
-        3
-      </div>
-    </div>
+  
+    
 
     {/* Card principal */}
     <div className="
@@ -108,23 +84,7 @@ PRIMARY: [],
         Elige tus materias
       </h2>
 
-      {/* Fake search */}
-      <div className="mb-8 flex justify-center">
-        <input
-          type="text"
-          placeholder="Buscar materia..."
-          className="
-            w-full max-w-md
-            rounded-full
-            px-5 py-2
-            bg-white/60
-            text-gray-800
-            placeholder-gray-500
-            focus:outline-none
-            focus:ring-2 focus:ring-salviaGreen
-          "
-        />
-      </div>
+     
 
       {/* Subjects */}
       {(Object.keys(subjectsByLevel) as Level[]).map((level) => (
