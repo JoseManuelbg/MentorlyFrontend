@@ -18,13 +18,15 @@ const Step2: React.FC<StepProps> = ({
   values,
 }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
 
   console.log(values)
   // Traer materias desde la API
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const res = await fetch("http://localhost:8080/subjects");
+        const res = await fetch(`${BASE_URL}/subjects`);
         if (!res.ok) throw new Error("Error fetching subjects");
 
         const data: Subject[] = await res.json();
