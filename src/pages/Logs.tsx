@@ -23,7 +23,6 @@ export default function AuditTable() {
 
  const fetchLogs = async () => {
   try {
-    console.log("Intentando recuperar logs con token:", token);
     const res = await fetch(`${BASE_URL}/admin/audit/all`, {
       method: "GET",
       headers: { 

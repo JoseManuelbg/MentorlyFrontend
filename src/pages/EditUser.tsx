@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { notify } from "../reusable/Notification";
 import { useNavigate } from "react-router-dom";
+import type { ApiError } from '../models/ApiError'; // Importante para la consistencia
 
 export default function EditUserForm() {
   const { token, logout } = useAuth();
@@ -32,7 +33,10 @@ export default function EditUserForm() {
         return;
       }
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errorData: ApiError = await res.json();
+        throw new Error(errorData.message || "Error al obtener perfil");
+      }
       
       const data = await res.json();
       setFormData({
@@ -40,15 +44,15 @@ export default function EditUserForm() {
         username: data.username,
         email: data.email,
         password: "", 
-        confirmPassword: "", // <-- Inicializamos vacío
+        confirmPassword: "",
         role: data.role,
       });
-    } catch (err) {
-      notify("Error al cargar datos de usuario", "error");
+    } catch (err: any) {
+      notify(err.message || "Error al cargar datos", "error");
     } finally {
       setLoadingUser(false);
     }
-  }, [token, logout, navigate]);
+  }, [token, logout, navigate, BASE_URL]);
 
   useEffect(() => {
     fetchUser();
@@ -61,10 +65,14 @@ export default function EditUserForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // --- VALIDACIÓN DE CONTRASEÑAS ---
-    if (formData.password !== formData.confirmPassword) {
-      notify("Las contraseñas no coinciden", "error");
-      return;
+    // Validación local: Coincidencia de contraseñas
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      return notify("Las contraseñas no coinciden", "error");
+    }
+
+    // Validación local: Longitud mínima si decide cambiarla
+    if (formData.password && formData.password.length < 6) {
+      return notify("La nueva contraseña debe tener al menos 6 caracteres", "error");
     }
 
     setLoading(true);
@@ -84,16 +92,16 @@ export default function EditUserForm() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        const errorData = (data as unknown) as { message: string };
-        notify(errorData.message || "Error al actualizar", "error");
-        return;
+        // Capturamos el error estructurado de tu Backend (BadRequestException, etc)
+        const errorData: ApiError = await res.json();
+        throw new Error(errorData.message || "Error al actualizar el perfil");
       }
 
       notify("Perfil actualizado correctamente", "success");
       navigate("/");
-    } catch (err) {
-      notify("Error de servidor", "error");
+    } catch (err: any) {
+      // Notificamos el mensaje exacto que viene del Service de Java
+      notify(err.message || "Error de conexión", "error");
     } finally {
       setLoading(false);
     }
@@ -101,55 +109,56 @@ export default function EditUserForm() {
 
   if (loadingUser) return (
     <div className="min-h-screen bg-salviaGreen flex items-center justify-center">
-      <p className="text-forestDark font-bold animate-pulse">Cargando perfil...</p>
+      <p className="text-forestDark font-black animate-pulse">Cargando perfil...</p>
     </div>
   );
 
   return (
-    <div className="bg-salviaGreen min-h-screen flex items-center justify-center p-4">
+    <div className="bg-salviaGreen min-h-screen flex items-center justify-center p-4 font-sans text-forestDark">
       <form
         onSubmit={handleSubmit}
-        className="backdrop-blur-lg bg-brokenWhite/80 p-8 rounded-2xl shadow-xl w-full max-w-md flex flex-col gap-5 border border-white/20"
+        className="backdrop-blur-md bg-brokenWhite/90 p-10 rounded-[3rem] shadow-2xl w-full max-w-md flex flex-col gap-6 border border-white/40"
       >
-        <h1 className="text-2xl font-bold text-forestDark text-center">Mi Perfil</h1>
+        <header className="text-center">
+          <h1 className="text-3xl font-black">Mi Perfil</h1>
+          <p className="text-xs font-bold text-forestDark/50 uppercase tracking-widest mt-1">Configuración de cuenta</p>
+        </header>
 
         <div className="space-y-4">
-          {/* Campos Dinámicos */}
           {[
             { label: "Nombre Completo", name: "name", type: "text", val: formData.name, placeholder: "" },
             { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, placeholder: "" },
-            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, placeholder: "Dejar en blanco para no cambiar" },
+            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, placeholder: "Dejar en blanco para mantener" },
             { label: "Confirmar Contraseña", name: "confirmPassword", type: "password", val: formData.confirmPassword, placeholder: "Repite la contraseña" },
           ].map((field) => (
             <div key={field.name}>
-              <label className="block text-xs font-bold text-forestDark/60 uppercase mb-1 ml-1">{field.label}</label>
+              <label className="block text-[10px] font-black text-forestDark/40 uppercase mb-1.5 ml-2">{field.label}</label>
               <input
                 type={field.type}
                 name={field.name}
                 value={field.val}
                 onChange={handleChange}
                 placeholder={field.placeholder}
-                className="block w-full rounded-xl py-2.5 px-4 bg-white/50 border border-sageGrey text-forestDark focus:ring-2 focus:ring-salviaGreen focus:outline-none transition-all"
+                className="block w-full rounded-2xl py-3 px-5 bg-white border border-sageGrey/20 text-forestDark focus:ring-2 focus:ring-salviaGreen focus:outline-none transition-all placeholder:text-slate-300 placeholder:text-xs"
               />
             </div>
           ))}
 
-          {/* Campos Bloqueados */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="block text-xs font-bold text-forestDark/40 uppercase mb-1 ml-1">Email</label>
+              <label className="block text-[10px] font-black text-forestDark/40 uppercase mb-1.5 ml-2">Email</label>
               <input
                 disabled
                 value={formData.email}
-                className="block w-full rounded-xl py-2 px-3 bg-sageGrey/30 border border-transparent text-forestDark/50 cursor-not-allowed text-sm"
+                className="block w-full rounded-2xl py-3 px-4 bg-sageGrey/10 border border-transparent text-forestDark/40 cursor-not-allowed text-xs font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-forestDark/40 uppercase mb-1 ml-1">Rol</label>
+              <label className="block text-[10px] font-black text-forestDark/40 uppercase mb-1.5 ml-2">Rol</label>
               <input
                 disabled
                 value={formData.role}
-                className="block w-full rounded-xl py-2 px-3 bg-sageGrey/30 border border-transparent text-forestDark/50 cursor-not-allowed text-sm"
+                className="block w-full rounded-2xl py-3 px-4 bg-sageGrey/10 border border-transparent text-forestDark/40 cursor-not-allowed text-xs font-bold"
               />
             </div>
           </div>
@@ -159,14 +168,14 @@ export default function EditUserForm() {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex-1 py-3 px-4 rounded-xl font-bold text-forestDark border-2 border-sageGrey hover:bg-sageGrey/20 transition-all"
+            className="flex-1 py-4 px-4 rounded-2xl font-black text-forestDark bg-white border border-sageGrey/20 hover:bg-sageGrey/10 transition-all active:scale-95"
           >
             Volver
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 py-3 px-4 rounded-xl font-bold bg-forestDark text-white shadow-lg hover:bg-forestDark/90 disabled:opacity-50 transition-all"
+            className="flex-1 py-4 px-4 rounded-2xl font-black bg-forestDark text-white shadow-xl hover:bg-forestDark/90 disabled:opacity-50 transition-all active:scale-95"
           >
             {loading ? "Guardando..." : "Guardar"}
           </button>
