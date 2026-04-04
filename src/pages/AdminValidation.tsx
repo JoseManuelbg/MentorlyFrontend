@@ -10,22 +10,10 @@ interface Subject {
   level: string;
 }
 
-
-interface Subject {
-  id: number;
-  name: string;
-  level: string;
-}
 interface MentorRequest {
-<<<<<<< HEAD
-  id: number; 
-  userEmail: string;
-  subjectIds: string; 
-=======
   id: number;
   userEmail: string;
-  subjectIds: any; 
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
+  subjectIds: any;
   academicLevel: string;
   description: string;
   status: string;
@@ -34,39 +22,21 @@ interface MentorRequest {
 export default function AdminValidation() {
   const { token } = useAuth();
   const [requests, setRequests] = useState<MentorRequest[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]); // Guardamos el catálogo de materias
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const BASE_URL = import.meta.env.VITE_API_URL;
-  const [subjects, setSubjects] = useState<Subject[]>([]);
 
-
-<<<<<<< HEAD
-  useEffect(() => {
-    fetchRequests();
-  }, [token]);
-
-
-
-  const fetchRequests = async () => {
-=======
   const fetchData = async () => {
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
     try {
-      // Cargamos solicitudes y materias en paralelo para ganar velocidad
       const [resReq, resSub] = await Promise.all([
         fetch(`${BASE_URL}/api/requests/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${BASE_URL}/subjects`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
-      if (!resReq.ok || !resSub.ok) {
-        throw new Error("Error al obtener datos del servidor");
-      }
+      if (!resReq.ok || !resSub.ok) throw new Error("Error al obtener datos del servidor");
 
-      const dataRequests = await resReq.json();
-      const dataSubjects = await resSub.json();
-
-      setRequests(dataRequests);
-      setSubjects(dataSubjects);
+      setRequests(await resReq.json());
+      setSubjects(await resSub.json());
     } catch (error: any) {
       notify(error.message, "error");
     } finally {
@@ -74,34 +44,20 @@ export default function AdminValidation() {
     }
   };
 
-  useEffect(() => {
-<<<<<<< HEAD
-    fetch(`${BASE_URL}/subjects`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => res.json())
-    .then(data => setSubjects(data))
-    .catch(() => notify("Error al cargar materias", "error"));
-  }, [token]);
+  useEffect(() => { fetchData(); }, [token]);
 
-=======
-    fetchData();
-  }, [token]);
-
-  // Función mágica para convertir ID -> "Nombre - Nivel"
   const getSubjectInfo = (id: string | number) => {
     const subject = subjects.find(s => s.id === Number(id));
     return subject ? `${subject.name} (${subject.level})` : `ID: ${id}`;
   };
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
 
   const handleAction = async (requestId: number, userEmail: string, action: 'APPROVE' | 'REJECT') => {
     try {
       const res = await fetch(`${BASE_URL}/api/requests/validate`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ requestId, userEmail, action })
       });
@@ -141,38 +97,29 @@ export default function AdminValidation() {
                   Nivel Solicitado: {req.academicLevel}
                 </span>
                 <h3 className="text-2xl font-black mt-3 text-forestDark">{req.userEmail}</h3>
-                
-<<<<<<< HEAD
-                {/* SOLUCIÓN AL ERROR .MAP: Convertimos el String en Array antes de mapear */}
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {req.subjectIds ? req.subjectIds.split(",").map((id, i) => (
-                    <span key={i} className="text-salviaGreen font-bold text-xs bg-salviaGreen/10 px-2 py-0.5 rounded-lg">
-                      {subjects.filter(sub => (sub.id.toString() === id)).at(0)?.name}
-=======
+
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {/* Manejamos tanto si viene String "1,2" como si viene Array [1,2] */}
                   {(Array.isArray(req.subjectIds) ? req.subjectIds : req.subjectIds?.split(",") || []).map((id: any, i: number) => (
                     <span key={i} className="text-salviaGreen font-bold text-[11px] bg-salviaGreen/10 px-3 py-1 rounded-full border border-salviaGreen/20">
                       {getSubjectInfo(id)}
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
                     </span>
                   ))}
                 </div>
-                
+
                 <div className="mt-4 p-4 bg-brokenWhite rounded-2xl border border-sageGrey/10">
                   <p className="text-slate-600 text-sm leading-relaxed italic">"{req.description}"</p>
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <button 
+                <button
                   onClick={() => handleAction(req.id, req.userEmail, 'REJECT')}
                   className="px-6 py-3 rounded-2xl font-bold text-red-500 hover:bg-red-50 transition-all active:scale-95"
                 >
                   Rechazar
                 </button>
-                <button 
-                  onClick={() => handleAction(req.id,  req.userEmail, 'APPROVE')}
+                <button
+                  onClick={() => handleAction(req.id, req.userEmail, 'APPROVE')}
                   className="px-8 py-3 bg-salviaGreen text-white rounded-2xl font-black hover:bg-forestDark transition-all shadow-lg active:scale-95"
                 >
                   Aprobar Mentor

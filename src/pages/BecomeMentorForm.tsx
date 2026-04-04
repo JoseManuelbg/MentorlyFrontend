@@ -7,7 +7,7 @@ import type { ApiError } from '../models/ApiError';
 interface Subject {
   id: number;
   name: string;
-  level: string; // Aquí vendrá 'PRIMARY', 'HIGH_SCHOOL', etc.
+  level: string;
 }
 
 export default function BecomeMentorForm() {
@@ -17,55 +17,35 @@ export default function BecomeMentorForm() {
   const BASE_URL = import.meta.env.VITE_API_URL;
 
   const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
-<<<<<<< HEAD
-  
-
-  const [level, setLevel] = useState('primary');
-
-  // Cambiamos a un Array para soportar varias materias
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<number[]>([]);
-
   const [formData, setFormData] = useState({
-    level: level,
-=======
-  const [selectedSubjectIds, setSelectedSubjectIds] = useState<number[]>([]);
-
-  const [formData, setFormData] = useState({
-    level: "PRIMARY", // Valor inicial que coincide con tu Enum
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
+    level: "PRIMARY",
     motivation: ""
   });
 
-  // 1. CARGA ÚNICA: Traemos todas las materias al montar el componente
   useEffect(() => {
     fetch(`${BASE_URL}/subjects`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    .then(res => res.json())
-    .then(data => setAvailableSubjects(data))
-    .catch(() => notify("Error al cargar el catálogo de materias", "error"));
+      .then(res => res.json())
+      .then(data => setAvailableSubjects(data))
+      .catch(() => notify("Error al cargar el catálogo de materias", "error"));
   }, [token, BASE_URL]);
 
-  // 2. FILTRADO DINÁMICO: Filtramos localmente por el Enum exacto
   const filteredSubjects = availableSubjects.filter(sub => sub.level === formData.level);
 
   const toggleSubject = (id: number) => {
-    setSelectedSubjectIds(prev => 
+    setSelectedSubjectIds(prev =>
       prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
     );
   };
-
-  const filteredSubject = availableSubjects.filter(sub =>
-    sub.level.toLocaleLowerCase().includes(level.toLowerCase())
-  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSubjectIds.length === 0) return notify("Selecciona al menos una materia", "error");
     if (formData.motivation.length < 20) return notify("La motivación es demasiado corta", "error");
-    
-    setLoading(true);
 
+    setLoading(true);
     try {
       const response = await fetch(`${BASE_URL}/api/requests/apply`, {
         method: "POST",
@@ -74,8 +54,8 @@ export default function BecomeMentorForm() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userEmail: authUser?.sub, 
-          subjectIds: selectedSubjectIds, 
+          userEmail: authUser?.sub,
+          subjectIds: selectedSubjectIds,
           academicLevel: formData.level,
           description: formData.motivation
         }),
@@ -88,7 +68,7 @@ export default function BecomeMentorForm() {
         const errorData: ApiError = await response.json();
         notify(errorData.message || "Error al enviar solicitud", "error");
       }
-    } catch (error) {
+    } catch {
       notify("Error de conexión", "error");
     } finally {
       setLoading(false);
@@ -103,25 +83,25 @@ export default function BecomeMentorForm() {
         </h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          
+
+          {/* NIVEL ACADÉMICO — primero para que el filtro de materias tenga contexto */}
           <div>
-<<<<<<< HEAD
-            <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Materias a impartir</label>
-            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-brokenWhite rounded-2xl">
-              {filteredSubject.map(sub => (
-                <div 
-                  key={sub.id}
-                  onClick={() => toggleSubject(sub.id)}
-                  className={`cursor-pointer p-3 rounded-xl text-xs font-bold transition-all ${
-                    selectedSubjectIds.includes(sub.id) 
-                    ? "bg-salviaGreen text-white shadow-md" 
-                    : "bg-white text-forestDark hover:bg-sageGrey/10"
-                  }`}
-                >
-                  {sub.name}
-                </div>
-              ))}
-=======
+            <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Tu nivel académico</label>
+            <select
+              value={formData.level}
+              className="w-full bg-brokenWhite border-none rounded-2xl p-4 text-forestDark focus:ring-2 focus:ring-salviaGreen outline-none font-semibold cursor-pointer"
+              onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+            >
+              <option value="PRIMARY">Primaria</option>
+              <option value="SECONDARY">Secundaria (ESO)</option>
+              <option value="HIGH_SCHOOL">Bachillerato</option>
+              <option value="VOCATIONAL">Formación Profesional</option>
+              <option value="UNIVERSITY">Universidad</option>
+            </select>
+          </div>
+
+          {/* MATERIAS — filtradas por nivel */}
+          <div>
             <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">
               Materias de {formData.level} ({selectedSubjectIds.length} seleccionadas en total)
             </label>
@@ -133,9 +113,9 @@ export default function BecomeMentorForm() {
                     key={sub.id}
                     onClick={() => toggleSubject(sub.id)}
                     className={`p-3 rounded-xl text-[11px] font-bold transition-all text-left ${
-                      selectedSubjectIds.includes(sub.id) 
-                      ? "bg-salviaGreen text-white shadow-md scale-[1.02]" 
-                      : "bg-white text-forestDark hover:bg-sageGrey/10 border border-sageGrey/10"
+                      selectedSubjectIds.includes(sub.id)
+                        ? "bg-salviaGreen text-white shadow-md scale-[1.02]"
+                        : "bg-white text-forestDark hover:bg-sageGrey/10 border border-sageGrey/10"
                     }`}
                   >
                     {sub.name}
@@ -146,43 +126,22 @@ export default function BecomeMentorForm() {
                   No hay materias configuradas para {formData.level}
                 </p>
               )}
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Tu nivel académico</label>
-            <select 
-<<<<<<< HEAD
-              className="w-full bg-brokenWhite border-none rounded-2xl p-4 text-forestDark focus:ring-2 focus:ring-salviaGreen outline-none font-semibold"
-              onChange={(e) => setLevel(e.target.value)}
-=======
-              value={formData.level} 
-              className="w-full bg-brokenWhite border-none rounded-2xl p-4 text-forestDark focus:ring-2 focus:ring-salviaGreen outline-none font-semibold cursor-pointer"
-              onChange={(e) => setFormData({...formData, level: e.target.value})}
->>>>>>> 2ee78f679d22fb7d34c33abfba99db0148f0141b
-            >
-              {/* LOS VALORES DE 'VALUE' SON AHORA IDÉNTICOS A TU ENUM */}
-              <option value="PRIMARY">Primaria</option>
-              <option value="SECONDARY">Secundaria (ESO)</option>
-              <option value="HIGH_SCHOOL">Bachillerato</option>
-              <option value="VOCATIONAL">Formación Profesional</option>
-              <option value="UNIVERSITY">Universidad</option>
-            </select>
-          </div>
-
+          {/* MOTIVACIÓN */}
           <div>
             <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Motivación</label>
-            <textarea 
+            <textarea
               required
               value={formData.motivation}
               className="w-full bg-brokenWhite border-none rounded-[2rem] p-5 text-forestDark focus:ring-2 focus:ring-salviaGreen outline-none resize-none h-32 text-sm"
-              onChange={(e) => setFormData({...formData, motivation: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
               placeholder="Cuéntanos por qué quieres ser mentor..."
-            ></textarea>
+            />
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="bg-forestDark text-white py-4 rounded-full font-black hover:bg-salviaGreen transition-all shadow-lg disabled:opacity-50"
