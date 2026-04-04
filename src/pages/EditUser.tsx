@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { notify } from "../reusable/Notification";
 import { useNavigate } from "react-router-dom";
-import type { ApiError } from '../models/ApiError'; // Importante para la consistencia
+import type { ApiError } from '../models/ApiError';
 
 export default function EditUserForm() {
   const { token, logout } = useAuth();
@@ -33,19 +33,18 @@ export default function EditUserForm() {
         return;
       }
 
+      const data = await res.json();
       if (!res.ok) {
-        const errorData: ApiError = await res.json();
-        throw new Error(errorData.message || "Error al obtener perfil");
+        throw new Error(data.message || "Error al obtener perfil");
       }
       
-      const data = await res.json();
       setFormData({
-        name: data.name,
-        username: data.username,
-        email: data.email,
+        name: data.name || "",
+        username: data.username || "",
+        email: data.email || "",
         password: "", 
         confirmPassword: "",
-        role: data.role,
+        role: data.role || "",
       });
     } catch (err: any) {
       notify(err.message || "Error al cargar datos", "error");
@@ -65,12 +64,17 @@ export default function EditUserForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // --- NUEVA VALIDACIÓN: CAMPOS OBLIGATORIOS NO VACÍOS ---
+    if (!formData.name.trim() || !formData.username.trim()) {
+      return notify("El nombre y el nombre de usuario no pueden estar vacíos", "error");
+    }
+
     // Validación local: Coincidencia de contraseñas
     if (formData.password && formData.password !== formData.confirmPassword) {
       return notify("Las contraseñas no coinciden", "error");
     }
 
-    // Validación local: Longitud mínima si decide cambiarla
+    // Validación local: Longitud mínima
     if (formData.password && formData.password.length < 6) {
       return notify("La nueva contraseña debe tener al menos 6 caracteres", "error");
     }
@@ -85,22 +89,20 @@ export default function EditUserForm() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name: formData.name,
-          username: formData.username,
+          name: formData.name.trim(),
+          username: formData.username.trim(),
           password: formData.password || null 
         }),
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        // Capturamos el error estructurado de tu Backend (BadRequestException, etc)
-        const errorData: ApiError = await res.json();
-        throw new Error(errorData.message || "Error al actualizar el perfil");
+        throw new Error(data.message || "Error al actualizar el perfil");
       }
 
       notify("Perfil actualizado correctamente", "success");
       navigate("/");
     } catch (err: any) {
-      // Notificamos el mensaje exacto que viene del Service de Java
       notify(err.message || "Error de conexión", "error");
     } finally {
       setLoading(false);
@@ -126,19 +128,22 @@ export default function EditUserForm() {
 
         <div className="space-y-4">
           {[
-            { label: "Nombre Completo", name: "name", type: "text", val: formData.name, placeholder: "" },
-            { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, placeholder: "" },
-            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, placeholder: "Dejar en blanco para mantener" },
-            { label: "Confirmar Contraseña", name: "confirmPassword", type: "password", val: formData.confirmPassword, placeholder: "Repite la contraseña" },
+            { label: "Nombre Completo", name: "name", type: "text", val: formData.name, placeholder: "", required: true },
+            { label: "Nombre de Usuario", name: "username", type: "text", val: formData.username, placeholder: "", required: true },
+            { label: "Nueva Contraseña", name: "password", type: "password", val: formData.password, placeholder: "Dejar en blanco para mantener", required: false },
+            { label: "Confirmar Contraseña", name: "confirmPassword", type: "password", val: formData.confirmPassword, placeholder: "Repite la contraseña", required: false },
           ].map((field) => (
             <div key={field.name}>
-              <label className="block text-[10px] font-black text-forestDark/40 uppercase mb-1.5 ml-2">{field.label}</label>
+              <label className="block text-[10px] font-black text-forestDark/40 uppercase mb-1.5 ml-2">
+                {field.label} {field.required && <span className="text-red-500">*</span>}
+              </label>
               <input
                 type={field.type}
                 name={field.name}
                 value={field.val}
                 onChange={handleChange}
                 placeholder={field.placeholder}
+                required={field.required}
                 className="block w-full rounded-2xl py-3 px-5 bg-white border border-sageGrey/20 text-forestDark focus:ring-2 focus:ring-salviaGreen focus:outline-none transition-all placeholder:text-slate-300 placeholder:text-xs"
               />
             </div>
