@@ -41,7 +41,7 @@ const IconWarn = () => (
 const SubjectsPanel: React.FC = () => {
   const { token, user } = useAuth(); // asume que useAuth expone el rol del usuario
 const isAdmin = user?.roles?.some((r) =>
-  typeof r === "string" ? r === "ADMIN" : (r as { name: string }).name === "ADMIN"
+  typeof r === "string" ? r === "admin" : (r as { name: string }).name === "admin"
 ); const BASE_URL = import.meta.env.VITE_API_URL;
 
   const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
