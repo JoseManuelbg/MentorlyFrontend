@@ -59,7 +59,7 @@ export default function Navbar() {
         {isMentor && (
           <>
             <Link
-              to="/my-subjects"
+              to="/subjects"
               className={`${linkBase} ${isActive("/subjects") ? activeLink : inactiveLink}`}
             >
               Mis Materias
