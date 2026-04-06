@@ -60,7 +60,7 @@ export default function Navbar() {
           <>
             <Link
               to="/my-subjects"
-              className={`${linkBase} ${isActive("/my-subjects") ? activeLink : inactiveLink}`}
+              className={`${linkBase} ${isActive("/subjects") ? activeLink : inactiveLink}`}
             >
               Mis Materias
             </Link>
