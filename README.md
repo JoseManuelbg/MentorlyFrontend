@@ -5,6 +5,9 @@ estudiantes. Contra la [API en Spring Boot](https://github.com/JoseManuelbg/Ment
 
 **En producción:** https://proyecto2526frontend-jose-manuelbg.vercel.app
 
+Hay un [paso a paso con cuentas de demostración](docs/DEMO.md) para
+recorrer la plataforma sin registrarse.
+
 ## Qué se puede hacer
 
 - Registrarse, iniciar sesión (también con Google) y recuperar la
