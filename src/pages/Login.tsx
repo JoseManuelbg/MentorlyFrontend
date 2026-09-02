@@ -100,7 +100,21 @@ className="backdrop-blur-lg bg-brokenWhite/70 p-6 rounded-xl shadow-lg w-full fl
 
 </div>
 
+<div className="rounded-lg bg-white/30 p-4 text-sm text-gray-700">
 
+<p className="font-semibold mb-2">¿Solo quieres verla por dentro? Usa una cuenta de demostración:</p>
+
+<div className="flex flex-col sm:flex-row gap-2">
+
+<button type="button" onClick={() => { setEmail("demo.student@mentorly.test"); setPassword("Demo1234!"); }} className="flex-1 px-3 py-1.5 rounded-lg bg-white/40 hover:bg-blue-600/60 hover:text-white transition-all duration-300">Como estudiante</button>
+
+<button type="button" onClick={() => { setEmail("demo.mentor@mentorly.test"); setPassword("Demo1234!"); }} className="flex-1 px-3 py-1.5 rounded-lg bg-white/40 hover:bg-blue-600/60 hover:text-white transition-all duration-300">Como mentor</button>
+
+</div>
+
+<p className="mt-2 text-xs text-gray-500">Rellenan el formulario por ti: después pulsa Log In.</p>
+
+</div>
 
 </form>
 
