@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env locales (los .env.development/.production del repo solo llevan URLs públicas)
+.env.local
+.env.*.local
